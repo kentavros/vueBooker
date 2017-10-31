@@ -2,24 +2,36 @@
   <div class="calendar">
 {{msg}}
 <button v-on:click="test()" class="btn btn-default">test</button>
-<!-- {{getWeekDays('sun')}} -->
-<!-- <p v-for="day in getDays">{{day}}</p> -->
-Day: {{currentDay}}, Month: {{currentMonth}} - {{getMonth[currentMonth]}}, Year: {{currentYear}}
+<!-- Day: {{currentDay}}, Month: {{currentMonth}} - {{getMonth[currentMonth]}}, Year: {{currentYear}} -->
 
 <br>
-<button v-on:click="minusMonth()" class="btn btn-default">-</button>
-<button v-on:click="plusMonth()" class="btn btn-default">+</button>
 
-    <div>
-      <table>
-        <tr>
-          <th v-for="wday in getDays" style="padding-left: 5px;">{{wday}}</th>
-        </tr>
-        <tr v-for="week in weeks">
-          <td style="padding-left: 5px;" v-for="day in week">{{day.calcNumber}}</td>
-        </tr>
-      </table>
-    </div>
+
+  <div class="row">
+      <div class="shadow col-md-10">
+        <div class="title">
+          <button v-on:click="minusMonth()" class="btn btn-default">&#9668;</button>
+          <p>{{getMonth[currentMonth]}} {{currentYear}}</p>
+          <button v-on:click="plusMonth()" class="btn btn-default">&#9658;</button>
+        </div>
+        <table class="table table-bordered">
+          <thead>
+          <tr class="info">
+            <th v-for="wday in getDays">{{wday}}</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="week in weeks">
+            <td class="day" v-for="day in week" :class="{date: day.calcNumber == currentDay}">{{day.calcNumber}}</td>  
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-2">
+        2222222222
+      </div>
+  </div>
+
   </div>
 </template>
 
@@ -29,13 +41,13 @@ export default {
   props: ['weekDays', 'nameMonth'],
   data () {
     return {
-      msg: 'Calendar',
+      msg: 'Calendar component',
       errorMsg: '',
       date: new Date(),
       weeks: [],
-      currentDay: '',
       currentMonth: '',
       currentYear: '',
+      refresh: false,
     }
   },
   methods:{
@@ -48,14 +60,13 @@ export default {
     getDayMonthYear: function()
     {
       var self = this
-      self.currentDay = self.date.getDate()
       self.currentMonth =self.date.getMonth()
       self.currentYear = self.date.getFullYear()
     },
     getArrayCalendar: function(){
       var self = this
-      var date = new Date(self.currentYear, self.currentMonth)
       self.weeks = []
+      var date = new Date(self.currentYear, self.currentMonth)
       self.weeks[0] = []
       for (var i=0; i < self.getNumDay(date); i++)
       {
@@ -72,7 +83,6 @@ export default {
         }
         date.setDate(date.getDate()+1)
       }
-      console.log(self.weeks)
     },
     getNumDay: function(date){
       var self = this
@@ -81,17 +91,17 @@ export default {
       {
         if (numDay == 0)
         {
-          numDay = 6
-          return numDay
+          numDay = 7
         }
+        return numDay - 1
       }
-      else if (self.weekDays == 'ru')
+      if (self.weekDays == 'ru')
       {
         if (numDay == 0)
         {
-          numDay = 6
-          return numDay
+          numDay = 7
         }
+        return numDay - 1
       }
       else
       {
@@ -101,11 +111,23 @@ export default {
     plusMonth: function(){
       var self = this
       self.currentMonth += 1
+      if (self.currentMonth > 11)
+      {
+        self.currentMonth = 0
+        self.currentYear += 1
+      }
+      self.refresh =false
       self.getArrayCalendar()
+      
     },
     minusMonth: function(){
       var self = this
       self.currentMonth -= 1
+      if (self.currentMonth < 0){
+        self.currentMonth = 11
+        self.currentYear -= 1
+      }
+      self.refresh =false
       self.getArrayCalendar()
     }
   },
@@ -117,7 +139,18 @@ export default {
     getMonth(){
       var self = this
       return getNameMonth(self.nameMonth)
-    }
+    },
+    currentDay(){
+      var self = this
+      if (self.date.getMonth() == self.currentMonth && self.date.getFullYear() == self.currentYear)
+      {
+        return self.date.getDate()
+      }
+      else
+      {
+        return false
+      }
+    },
   },
   created(){
     this.getDayMonthYear()
@@ -128,5 +161,38 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.shadow {
+  padding: 0;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Параметры тени */
+/* padding: 10px; */
+}
+.date{
+  background-color: #b1b1da;
+  color: darkblue;
+  font-weight: bold;
+}
+.title{
+  text-align: center;
+  color: darkblue;
+  font-size: 17px;
+  font-weight: bold;
+  background-color: #d9edf7;
+  padding-top: 10px;
+}
+.title p{
+  width: 150px;
+  display: inline-table;
+}
+.title button{
+  background-color: #d9edf7;
+  border-color: #d9edf7;
+}
+.day{
+  cursor: pointer;
+  width: 118.33px;
+  height: 118.33px;
+}
+td:hover{
+  background: #84b8e1;
+}
 </style>
