@@ -1,14 +1,16 @@
 <template>
   <div class="main">
   
-    Hello!
-    <button v-on:click="getMonth()">test</button>
+    Hello - Main!
+    <calendar :weekDays="'sun'" :nameMonth="'en'"></calendar>
+  
 
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import Calendar from './Calendar'
 export default {
   name: 'Main',
   data () {
@@ -16,13 +18,8 @@ export default {
       
     }
   },
-  methods: {
-      getMonth: function(){
-        var self = this
-        var date = new Date()
-        console.log(date.getMonth())
-        // console.log(date.getDay())
-      }
+  components: {
+    'Calendar' : Calendar
   }
 }
 </script>
