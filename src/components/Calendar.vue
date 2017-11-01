@@ -1,13 +1,7 @@
 <template>
   <div class="calendar">
-{{msg}}
-<button v-on:click="test()" class="btn btn-default">test</button>
-<!-- Day: {{currentDay}}, Month: {{currentMonth}} - {{getMonth[currentMonth]}}, Year: {{currentYear}} -->
-
-<br>
-
-
-  <div class="row">
+      
+    <div class="row">
       <div class="shadow col-md-10">
         <div class="title">
           <button v-on:click="minusMonth()" class="btn btn-default">&#9668;</button>
@@ -28,7 +22,23 @@
         </table>
       </div>
       <div class="col-md-2">
-        2222222222
+        <div class="menu">
+          <div class="right-top-menu">
+            <div class="ru-en-btn">
+              <button v-if="nameMonth == 'en'" v-on:click="getRu()" class="btn btn-info">Ru</button>
+              <button v-else-if="nameMonth == 'ru'" v-on:click="getEn()" class="btn btn-info">En</button>
+            </div>
+            <div class="mon-sun-btn">
+              <button v-if="weekDays == 'sun'" v-on:click="firstMonday()" class="btn btn-info">Monday First</button>
+              <button v-else-if="weekDays == 'mon'" v-on:click="firstSunday()" class="btn btn-info">Sunday First</button>
+            </div>
+          </div>
+          <div class="btn-Book-Emp">
+            <button v-on:click="test('Book it!')" class="btn btn-success">Book It!</button>
+            <button v-on:click="test('Emp... List')" class="btn btn-danger">Employee List</button>
+          </div>
+
+        </div>
       </div>
   </div>
 
@@ -38,26 +48,24 @@
 <script>
 export default {
   name: 'calendar',
-  props: ['weekDays', 'nameMonth'],
   data () {
     return {
-      msg: 'Calendar component',
+      msg: '',
       errorMsg: '',
       date: new Date(),
       weeks: [],
       currentMonth: '',
       currentYear: '',
-      refresh: false,
+      weekDays: 'sun',
+      nameMonth: 'en'
     }
   },
   methods:{
-    test: function(){
+    test: function(str){
       var self = this
-      console.log(self.getDays)
-      console.log(self.getMonth)
-      
+      alert(str)
     },
-    getDayMonthYear: function()
+    getMonthYear: function()
     {
       var self = this
       self.currentMonth =self.date.getMonth()
@@ -116,7 +124,6 @@ export default {
         self.currentMonth = 0
         self.currentYear += 1
       }
-      self.refresh =false
       self.getArrayCalendar()
       
     },
@@ -127,7 +134,28 @@ export default {
         self.currentMonth = 11
         self.currentYear -= 1
       }
-      self.refresh =false
+      self.getArrayCalendar()
+    },
+    firstMonday: function(){
+      var self = this 
+      self.weekDays = 'mon'
+      self.getArrayCalendar()
+    },
+    firstSunday: function(){
+      var self = this
+      self.weekDays = 'sun'
+      self.getArrayCalendar()
+    },
+    getRu: function(){
+      var self = this
+      self.nameMonth = 'ru'
+      self.weekDays = 'ru'
+      self.getArrayCalendar()
+    },
+    getEn: function(){
+      var self = this
+      self.nameMonth = 'en'
+      self.weekDays = 'sun'
       self.getArrayCalendar()
     }
   },
@@ -153,23 +181,24 @@ export default {
     },
   },
   created(){
-    this.getDayMonthYear()
+    this.getMonthYear()
     this.getArrayCalendar()
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .shadow {
   padding: 0;
   box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Параметры тени */
-/* padding: 10px; */
 }
 .date{
   background-color: #b1b1da;
-  color: darkblue;
+  color: #b12d1f;
   font-weight: bold;
+}
+tbody{
+  background-color: white;
 }
 .title{
   text-align: center;
@@ -193,6 +222,23 @@ export default {
   height: 118.33px;
 }
 td:hover{
-  background: #84b8e1;
+  background: #c7e3f1;
+}
+.ru-en-btn{
+  margin-bottom: 15px;
+}
+.mon-sun-btn{
+  margin-bottom: 15px;
+  width: 115px;
+}
+.right-top-menu{
+  height: 100px;
+}
+.btn-Book-Emp{
+  height: 300px;
+}
+.btn-Book-Emp button{
+  margin-top: 70px;
+  width: 115px;
 }
 </style>

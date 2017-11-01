@@ -4,8 +4,19 @@
       <login></login>
     </div>
     <div v-else>
-      Hello <strong>{{user.login}}</strong> - Main!
-      <calendar :weekDays="'sun'" :nameMonth="'en'"></calendar>
+      <div class="header">
+        Hello, <strong>{{user.login}}</strong>!
+        <p>
+          <button v-on:click="logout()" class="btn btn-info">logout</button>
+        </p>
+      </div>
+
+      <!-- <calendar :weekDays="weekDays" :nameMonth="nameMonth"></calendar> -->
+      <calendar></calendar>
+
+      <div class="footer">
+          &nbsp;
+      </div>
     </div>
     
 
@@ -25,9 +36,25 @@ export default {
       checkUser: '',
       role: '',
       user: {},
+      // weekDays: 'sun',
+      // nameMonth: 'en'
     }
   },
   methods: {
+    logout: function(){
+      var self = this 
+      if (localStorage['user'])
+      {
+        delete localStorage['user']
+        self.user = {},
+        self.checkUser = ''
+        return true
+      }
+      else 
+      {
+        return false
+      }
+    },
     checkUserFun: function()
     {
       var self = this
@@ -36,7 +63,7 @@ export default {
         self.user = JSON.parse(localStorage['user'])
         axios.get(getUrl() + 'users/' + self.user.id)
             .then(function (response) {
-              console.log(response.data)
+              // console.log(response.data)
               if (Array.isArray(response.data)){
                 if (self.user.hash === response.data[0].hash)
                 {
@@ -81,5 +108,12 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.header{
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+.footer{
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
 </style>
