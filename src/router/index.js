@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Main from '@/components/Main'
 import EmpList from '@/components/EmpList'
+import AddUser from '@/components/AddUser'
 // import Registration from '@/components/Registration'
 // import Cart from '@/components/Cart'
 // import Admin from '@/components/Admin'
@@ -22,7 +23,13 @@ export default new Router({
     {
       path: '/emplist',
       name: 'EmpList',
-      component: EmpList
+      component: EmpList,
+      children: [
+        {
+          path: 'addnew',
+          component: AddUser
+        }
+      ]
     }
     // {
     //   path: '/registration',

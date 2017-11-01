@@ -1,6 +1,6 @@
 <template>
   <div class="empList">
-    <div class="usersList">
+    <div v-if="addUser == ''" class="usersList">
       <div id="legend">
             <legend class="title">Employee List</legend>
       </div>
@@ -15,8 +15,8 @@
              <th class="thTable">Remove</th>
            </tr>
          </thead>
-         <tbody v-for="(u, index) in users">
-           <tr>
+         <tbody>
+           <tr v-for="(u, index) in users">
              <td>{{u.id}}</td>
              <td>{{u.login}}</td>
              <td>{{u.email}}</td>
@@ -26,10 +26,12 @@
            </tr>
          </tbody>
        </table>
-       <button class="btn alert-success" v-on:click="1">Add a new Employee</button>
-       <router-link to="/"><button class="btn alert-info">Back</button></router-link>
+       <router-link to="/emplist/addnew/"><button v-on:click="addUser=1" class="btn btn-success" >Add a new Employee</button></router-link>
+       <router-link to="/"><button class="btn btn-info">Back</button></router-link>
     </div>
-
+    <div v-else>
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -41,6 +43,7 @@ export default {
     return {
       msg: '',
       errorMsg: '',
+      addUser: '',
       user: {},
       users: [],
     }
@@ -53,9 +56,10 @@ export default {
     },
     getUsersList:function(){
       var self = this
+      self.addUser = ''
       axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
-          console.log(response.data)
+          // console.log(response.data)
           if (Array.isArray(response.data))
           {
             self.users = response.data
@@ -119,10 +123,11 @@ export default {
 <style scoped>
 .usersList{
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 1);
   padding-bottom: 20px;
 }
 .thTable{
   text-align: center;
 }
+
 </style>
