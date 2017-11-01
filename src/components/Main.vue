@@ -11,8 +11,7 @@
         </p>
       </div>
 
-      <!-- <calendar :weekDays="weekDays" :nameMonth="nameMonth"></calendar> -->
-      <calendar></calendar>
+      <calendar :role="user.role"></calendar>
 
       <div class="footer">
           &nbsp;
@@ -36,8 +35,6 @@ export default {
       checkUser: '',
       role: '',
       user: {},
-      // weekDays: 'sun',
-      // nameMonth: 'en'
     }
   },
   methods: {
@@ -67,10 +64,10 @@ export default {
               if (Array.isArray(response.data)){
                 if (self.user.hash === response.data[0].hash)
                 {
-                    self.checkUser = 1;
-                    self.user.login = response.data[0].login
-                    self.user.role = response.data[0].role
-                    return true
+                  self.user.login = response.data[0].login
+                  self.user.role = response.data[0].role
+                  self.checkUser = 1;
+                  return true
                 }
                 else
                 {

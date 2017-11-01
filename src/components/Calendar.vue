@@ -35,7 +35,9 @@
           </div>
           <div class="btn-Book-Emp">
             <button v-on:click="test('Book it!')" class="btn btn-success">Book It!</button>
-            <button v-on:click="test('Emp... List')" class="btn btn-danger">Employee List</button>
+            <router-link v-if="role == 'admin'" to="/emplist">
+              <button class="btn btn-danger">Employee List</button>
+            </router-link>
           </div>
 
         </div>
@@ -48,6 +50,7 @@
 <script>
 export default {
   name: 'calendar',
+  props: ['role'],
   data () {
     return {
       msg: '',
@@ -57,7 +60,8 @@ export default {
       currentMonth: '',
       currentYear: '',
       weekDays: 'sun',
-      nameMonth: 'en'
+      nameMonth: 'en',
+      rooms: ''
     }
   },
   methods:{
