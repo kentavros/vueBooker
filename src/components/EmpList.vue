@@ -4,6 +4,8 @@
       <div id="legend">
             <legend class="title">Employee List</legend>
       </div>
+      <p class="alert-danger">{{errorMsg}}</p>
+      <p class="alert-success">{{msg}}</p>
        <table class="table table-hover">
          <thead>
            <tr class="info">
@@ -18,11 +20,11 @@
          <tbody>
            <tr v-for="(u, index) in users">
              <td>{{u.id}}</td>
-             <td>{{u.login}}</td>
-             <td>{{u.email}}</td>
+             <td><a :href="'mailto:'+u.email">{{u.login}}</a></td>
+             <td><a :href="'mailto:'+u.email">{{u.email}}</a></td>
              <td>{{u.role}}</td>
              <td><button class="btn alert-info" v-on:click="test(index)">Edit</button></td>
-             <td><button class="btn alert-danger" v-on:click="test(index)">Remove</button></td>
+             <td><button class="btn alert-danger" v-on:click="removeUser(index)">Remove</button></td>
            </tr>
          </tbody>
        </table>
@@ -53,6 +55,33 @@ export default {
       var self = this
       alert(str)
       console.log(self.users[str].login)
+    },
+    removeUser: function(index){
+      var self = this
+      self.msg = ''
+      self.errorMsg = ''
+      var result = confirm('Do you want to remove user "'+ self.users[index].login + '"?');
+      if (!result)
+      {
+        return false
+      }
+      axios.delete(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id +
+        '/id/' + self.users[index].id)
+          .then(function (response) {
+          // console.log(response.data)
+          if (response.data === 1)
+          {
+            self.msg = 'User with login "' + self.users[index].login + '" Delete - Success!'
+            self.getUsersList()
+          }
+          else{
+            self.errorMsg = response.data
+            return false;
+          }
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
     },
     getUsersList:function(){
       var self = this
@@ -128,6 +157,9 @@ export default {
 }
 .thTable{
   text-align: center;
+}
+a{
+  font-weight: bold;
 }
 
 </style>
