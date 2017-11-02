@@ -1,6 +1,6 @@
 <template>
   <div class="empList">
-    <div v-if="addUser == '' && editUser == ''" class="usersList">
+    <div v-if="addUser == '' && editUser.length == 0" class="usersList">
       <div id="legend">
             <legend class="title">Employee List</legend>
       </div>
@@ -26,29 +26,27 @@
              <td><a :href="'mailto:'+u.email">{{u.email}}</a></td>
              <td>{{u.role}}</td>
              <td>
-               <router-link to="/emplist/edituser">
-                  <button class="btn alert-info" v-on:click="editUser=1">Edit</button>
-               </router-link>
+                  <button class="btn alert-info" v-on:click="editUserFun(index)">Edit</button>
              </td>
              <td v-if="u.id != user.id"><button class="btn alert-danger" v-on:click="removeUser(index)">Remove</button></td>
              <td v-else>It is you</td>
            </tr>
          </tbody>
        </table>
-       <router-link to="/emplist/addnew"><button v-on:click="addUser=1" class="btn btn-success" >Add a new Employee</button></router-link>
+       <button v-on:click="addUser=1" class="btn btn-success" >Add a new Employee</button>
        <router-link to="/"><button class="btn btn-info">Back</button></router-link>
     </div>
-    <div v-else>
-      <router-view></router-view>
+    <div v-else-if="editUser.length !=0">
+      <edit-user :editUser="editUser"></edit-user>
     </div>
+    <div v-else-if="addUser == 1">
+      <add-user></add-user>
+    </div>
+
   </div>
 </template>
 
 <script>
-
-// window.onpopstate = function() {
- 
-// }
 import axios from 'axios'
 import AddUser from './AddUser'
 import EditUser from './EditUser'
@@ -59,16 +57,20 @@ export default {
       msg: '',
       errorMsg: '',
       addUser: '',
-      editUser: '',
+      editUser: {},
       user: {},
       users: [],
     }
   },
   methods: {
-    test:function(str){
+    editUserFun: function(index){
       var self = this
-      alert(str)
-      console.log(self.users[str].login)
+      self.editUser = self.users[index]
+      if (self.editUser)
+      {
+        return true
+      }
+      return false
     },
     removeUser: function(index){
       var self = this
@@ -85,8 +87,8 @@ export default {
           // console.log(response.data)
           if (response.data === 1)
           {
-            self.msg = 'User "' + self.users[index].username + '" Delete - Success!'
             self.getUsersList()
+            self.msg = 'User "' + self.users[index].username + '" Delete - Success!'
           }
           else{
             self.errorMsg = response.data
@@ -101,6 +103,8 @@ export default {
       var self = this
       self.addUser = ''
       self.editUser = ''
+      self.msg = ''
+      self.errorMsg = ''
       axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
           // console.log(response.data)
@@ -155,7 +159,11 @@ export default {
       else{
         self.$router.push('/')
       }
-    },
+    }
+  },
+  components: {
+    'EditUser' : EditUser,
+    'AddUser' : AddUser
   },
   created(){
     this.checkUserFun()
