@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Main from '@/components/Main'
 import EmpList from '@/components/EmpList'
 import AddUser from '@/components/AddUser'
+import EditUser from '@/components/EditUser'
 // import Registration from '@/components/Registration'
 // import Cart from '@/components/Cart'
 // import Admin from '@/components/Admin'
@@ -28,6 +29,10 @@ export default new Router({
         {
           path: 'addnew',
           component: AddUser
+        },
+        {
+          path: 'edituser',
+          component: EditUser
         }
       ]
     }

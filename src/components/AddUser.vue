@@ -8,10 +8,18 @@
             <legend class="title">User Registration</legend>
             </div>
             <div class="control-group">
+            <!-- UserName -->
+            <label class="control-label"  for="userName">User Name</label>
+            <div class="controls">
+                <input v-model="userName" type="text" id="userName" name="userName" class="input-xlarge">
+                <p class="help-block">Input your name or full name</p>
+            </div>
+            </div>
+            <div class="control-group">
             <!-- login -->
             <label class="control-label"  for="login">Login</label>
             <div class="controls">
-                <input v-model="login" type="text" id="login" name="login" placeholder="" class="input-xlarge">
+                <input v-model="login" type="text" id="login" name="login" class="input-xlarge">
                 <p class="help-block">Login can contain any letters or numbers, without spaces and latin letters </p>
             </div>
             </div>
@@ -19,7 +27,7 @@
             <!-- Email -->
             <label class="control-label"  for="email">Email</label>
             <div class="controls">
-                <input v-model="email" type="email" id="email" name="email" placeholder="" class="input-xlarge">
+                <input v-model="email" type="email" id="email" name="email" class="input-xlarge">
                 <p class="help-block">Input your email</p>
             </div>
             </div>
@@ -28,7 +36,7 @@
             <!-- Password-->
             <label class="control-label" for="password">Password</label>
             <div class="controls">
-                <input v-model="pass" type="password" id="password" name="password" placeholder="" class="input-xlarge">
+                <input v-model="pass" type="password" id="password" name="password" class="input-xlarge">
                 <p class="help-block">Password should be at least 4 characters</p>
             </div>
             </div>
@@ -37,7 +45,7 @@
             <!-- Password -->
             <label class="control-label"  for="password_confirm">Password (Confirm)</label>
             <div class="controls">
-                <input v-model="passConf" type="password" id="password_confirm" name="password_confirm" placeholder="" class="input-xlarge">
+                <input v-model="passConf" type="password" id="password_confirm" name="password_confirm" class="input-xlarge">
                 <p class="help-block">Please confirm password</p>
             </div>
             </div>
@@ -57,7 +65,7 @@
             <!-- Button -->
               <div class="controls">
                 <button v-if="success == ''" v-on:click="addUser()" class="btn btn-success">Register</button>
-                <p v-else class="alert-info">User {{login}}, Added</p>
+                <p v-else class="alert-info">User {{userName}}, Added</p>
                 <router-link to="/emplist">
                   <button class="btn btn-info" v-on:click="$parent.getUsersList()">Back</button>
                 </router-link>
@@ -78,6 +86,7 @@ export default {
     return {
       msg: '',
       errorMsg: '',
+      userName: '',
       login: '',
       email: '',
       pass: '',
@@ -90,8 +99,13 @@ export default {
     addUser: function(){
       var self = this
       self.errorMsg = ''
-      if (self.login && self.email && self.pass && self.passConf)
+      if (self.userName && self.login && self.email && self.pass && self.passConf)
       {
+        if (self.userName <=2)
+        {
+          self.errorMsg = 'User Name should be at least 3 characters!'
+          return false
+        }
         if (self.login.length <= 2)
         {
           self.errorMsg = 'Login should be at least 3 characters!'
@@ -115,6 +129,7 @@ export default {
         var data = new FormData()
         data.append('hash', self.$parent.user.hash)
         data.append('id_user', self.$parent.user.id)
+        data.append('username', self.userName)
         data.append('login', self.login)
         data.append('id_role', self.role)
         data.append('email', self.email)

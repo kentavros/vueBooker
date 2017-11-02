@@ -5,7 +5,7 @@
     </div>
     <div v-else>
       <div class="header">
-        Hello, <strong>{{user.login}}</strong>!
+        Hello, <strong>{{user.userName}}</strong>!
         <p>
           <button v-on:click="logout()" class="btn btn-info">logout</button>
         </p>
@@ -66,6 +66,7 @@ export default {
                 {
                   self.user.login = response.data[0].login
                   self.user.role = response.data[0].role
+                  self.user.userName = response.data[0].username
                   self.checkUser = 1;
                   return true
                 }

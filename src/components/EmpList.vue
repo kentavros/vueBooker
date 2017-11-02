@@ -1,6 +1,6 @@
 <template>
   <div class="empList">
-    <div v-if="addUser == ''" class="usersList">
+    <div v-if="addUser == '' && editUser == ''" class="usersList">
       <div id="legend">
             <legend class="title">Employee List</legend>
       </div>
@@ -10,6 +10,7 @@
          <thead>
            <tr class="info">
              <th class="thTable">ID</th>
+             <th class="thTable">User Name</th>
              <th class="thTable">login</th>
              <th class="thTable">email</th>
              <th class="thTable">role</th>
@@ -20,15 +21,21 @@
          <tbody>
            <tr v-for="(u, index) in users">
              <td>{{u.id}}</td>
-             <td><a :href="'mailto:'+u.email">{{u.login}}</a></td>
+             <td><a :href="'mailto:'+u.email">{{u.username}}</a></td>
+             <td>{{u.login}}</td>
              <td><a :href="'mailto:'+u.email">{{u.email}}</a></td>
              <td>{{u.role}}</td>
-             <td><button class="btn alert-info" v-on:click="test(index)">Edit</button></td>
-             <td><button class="btn alert-danger" v-on:click="removeUser(index)">Remove</button></td>
+             <td>
+               <router-link to="/emplist/edituser">
+                  <button class="btn alert-info" v-on:click="editUser=1">Edit</button>
+               </router-link>
+             </td>
+             <td v-if="u.id != user.id"><button class="btn alert-danger" v-on:click="removeUser(index)">Remove</button></td>
+             <td v-else>It is you</td>
            </tr>
          </tbody>
        </table>
-       <router-link to="/emplist/addnew/"><button v-on:click="addUser=1" class="btn btn-success" >Add a new Employee</button></router-link>
+       <router-link to="/emplist/addnew"><button v-on:click="addUser=1" class="btn btn-success" >Add a new Employee</button></router-link>
        <router-link to="/"><button class="btn btn-info">Back</button></router-link>
     </div>
     <div v-else>
@@ -38,7 +45,13 @@
 </template>
 
 <script>
+
+// window.onpopstate = function() {
+ 
+// }
 import axios from 'axios'
+import AddUser from './AddUser'
+import EditUser from './EditUser'
 export default {
   name: 'EmployeeList',
   data () {
@@ -46,6 +59,7 @@ export default {
       msg: '',
       errorMsg: '',
       addUser: '',
+      editUser: '',
       user: {},
       users: [],
     }
@@ -60,7 +74,7 @@ export default {
       var self = this
       self.msg = ''
       self.errorMsg = ''
-      var result = confirm('Do you want to remove user "'+ self.users[index].login + '"?');
+      var result = confirm('Do you want to remove user "'+ self.users[index].username + '"?');
       if (!result)
       {
         return false
@@ -71,7 +85,7 @@ export default {
           // console.log(response.data)
           if (response.data === 1)
           {
-            self.msg = 'User with login "' + self.users[index].login + '" Delete - Success!'
+            self.msg = 'User "' + self.users[index].username + '" Delete - Success!'
             self.getUsersList()
           }
           else{
@@ -86,6 +100,7 @@ export default {
     getUsersList:function(){
       var self = this
       self.addUser = ''
+      self.editUser = ''
       axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
           // console.log(response.data)
