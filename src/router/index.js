@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Main from '@/components/Main'
 import EmpList from '@/components/EmpList'
+import BookIt from '@/components/BookIt'
 
 Vue.use(Router)
 
@@ -16,6 +17,11 @@ export default new Router({
       path: '/emplist',
       name: 'EmpList',
       component: EmpList
+    },
+    {
+      path: '/bookit/:id',
+      name: 'BookIt',
+      component: BookIt
     }
   ]
 })

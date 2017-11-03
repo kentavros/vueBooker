@@ -25,9 +25,10 @@
           </thead>
           <tbody>
           <tr v-for="week in weeks">
-            <td class="day" v-for="day in week" :class="{date: day[0] == currentDay}">
-              <!-- {{day}} -->
-              <p v-for="d in day">{{d}}</p>
+            <td class="day" v-for="day in week" :class="{date: day[0] == currentDay}">{{day[0]}}
+                <p  class="events" v-if="day.length > 1" v-for="event in day[1]" >
+                  <router-link to="#" class="link">{{event.timeString}}</router-link>
+                  </p>
               </td>  
           </tr>
           </tbody>
@@ -46,7 +47,7 @@
             </div>
           </div>
           <div class="btn-Book-Emp">
-            <button v-on:click="test('Book it!')" class="btn btn-success">Book It!</button>
+            <router-link :to="{name: 'BookIt', params:{id: selRoom.id}}"><button class="btn btn-success">Book It!</button></router-link>
             <router-link v-if="user.role == 'admin'" to="/emplist">
               <button class="btn btn-danger">Employee List</button>
             </router-link>
@@ -82,6 +83,7 @@ export default {
   methods:{
     getEventsMonth: function(){
       var self = this
+      self.eventsMonth = []
       self.errorMsg = ''
       var year = self.currentYear
       var month = self.currentMonth+1
@@ -89,15 +91,11 @@ export default {
       axios.get(getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id +
       '/flag/like/time_start/' + dateString)
           .then(function (response) {
-          // console.log(response.data)
           if (Array.isArray(response.data))
           {
             self.eventsMonth = response.data
             self.getArrayCalendar()
-            self.addEventsToCal()
-          }
-          else{
-            self.errorMsg = response.data
+            
           }
       })
       .catch(function (error) {
@@ -107,12 +105,12 @@ export default {
     selRoomFun: function(index){
       var self = this
       self.selRoom = self.rooms[index]
+      self.getEventsMonth()
     },
     getRooms: function(){
       var self = this
       axios.get(getUrl() + 'rooms/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
-          // console.log(response.data)
           if (Array.isArray(response.data))
           {
             self.rooms = response.data
@@ -152,30 +150,51 @@ export default {
         }
         date.setDate(date.getDate()+1)
       }
-      console.log(self.weeks)
+      self.addEventsToCal()
     },
 
     addEventsToCal: function(){
       var self = this
-      // console.log(self.weeks)
       var calendar = self.weeks
       calendar.forEach(function(week) {
         week.forEach(function(day){
-          // console.log(self.eventsMonth)
           if (day[0]){
             self.eventsMonth.forEach(function(event)
             {
-              var dateEv = new Date(event.time_start)
-              var date = new Date(self.currentYear, self.currentMonth+1, day[0])
-              // console.log(date)
-              if (dateEv.getDate() === day[0])
+              if (event.id_room == self.selRoom.id)
               {
-                  // console.log(day)
+              var dateEvStart = new Date(event.time_start)
+              var dateEvEnd = new Date(event.time_end)
+              var date = new Date(self.currentYear, self.currentMonth+1, day[0])
+              if (dateEvStart.getDate() === day[0])
+              {
                   var str = ''
-                  var start = dateEv.getHours()
-                  start +=':' + date.getMinutes() + '-'
-                  day.push(start)
-                  
+                  var start = dateEvStart.getHours()
+                  var end = dateEvEnd.getHours()
+                  if (dateEvStart.getMinutes() == 0)
+                  {
+                  start +=':' + dateEvStart.getMinutes() + '0-'
+                  }
+                  else{
+                  start +=':' + dateEvStart.getMinutes() + '-'
+                  }
+                  if (dateEvEnd.getMinutes() == 0)
+                  {
+                    end += ':' + dateEvEnd.getMinutes() + '0'
+                  }
+                  else{
+                    end += ':' + dateEvEnd.getMinutes() 
+                  }
+                  str = start + end
+                  event.timeString = str
+                  if (day.length == 1)
+                  {
+                    day.push([event])
+                  }
+                  else{
+                    day[1].push(event)
+                  }
+              }
               }
             })
           }
@@ -215,6 +234,7 @@ export default {
         self.currentYear += 1
       }
       self.getEventsMonth()
+      self.getArrayCalendar()
       
     },
     minusMonth: function(){
@@ -225,6 +245,7 @@ export default {
         self.currentYear -= 1
       }
       self.getEventsMonth()
+      self.getArrayCalendar()
     },
     firstMonday: function(){
       var self = this 
@@ -273,9 +294,8 @@ export default {
   },
   created(){
     this.getMonthYear()
-    this.getEventsMonth()
     this.getRooms()
-
+    this.getEventsMonth()
   }
 }
 </script>
@@ -283,7 +303,7 @@ export default {
 <style scoped>
 .shadow {
   padding: 0;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Параметры тени */
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 .date{
   background-color: #b1b1da;
@@ -311,7 +331,7 @@ tbody{
 }
 .day{
   cursor: pointer;
-  width: 118.33px;
+  width: 122.61px;
   height: 118.33px;
 }
 td:hover{
@@ -351,5 +371,9 @@ td:hover{
   text-align: center;
   color: darkblue;
   font-size: 18px;
+}
+.events{
+  color: black;
+  font-weight: normal; 
 }
 </style>
