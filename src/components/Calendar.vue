@@ -25,7 +25,10 @@
           </thead>
           <tbody>
           <tr v-for="week in weeks">
-            <td class="day" v-for="day in week" :class="{date: day.calcNumber == currentDay}">{{day.calcNumber}}</td>  
+            <td class="day" v-for="day in week" :class="{date: day[0] == currentDay}">
+              <!-- {{day}} -->
+              <p v-for="d in day">{{d}}</p>
+              </td>  
           </tr>
           </tbody>
         </table>
@@ -44,7 +47,7 @@
           </div>
           <div class="btn-Book-Emp">
             <button v-on:click="test('Book it!')" class="btn btn-success">Book It!</button>
-            <router-link v-if="role == 'admin'" to="/emplist">
+            <router-link v-if="user.role == 'admin'" to="/emplist">
               <button class="btn btn-danger">Employee List</button>
             </router-link>
           </div>
@@ -60,7 +63,7 @@
 import axios from 'axios'
 export default {
   name: 'calendar',
-  props: ['role'],
+  props: ['user'],
   data () {
     return {
       msg: '',
@@ -72,17 +75,42 @@ export default {
       weekDays: 'sun',
       nameMonth: 'en',
       rooms: [],
-      selRoom: {}
+      selRoom: {},
+      eventsMonth: []
     }
   },
   methods:{
+    getEventsMonth: function(){
+      var self = this
+      self.errorMsg = ''
+      var year = self.currentYear
+      var month = self.currentMonth+1
+      var dateString = year + '-' + month 
+      axios.get(getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id +
+      '/flag/like/time_start/' + dateString)
+          .then(function (response) {
+          // console.log(response.data)
+          if (Array.isArray(response.data))
+          {
+            self.eventsMonth = response.data
+            self.getArrayCalendar()
+            self.addEventsToCal()
+          }
+          else{
+            self.errorMsg = response.data
+          }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+    },
     selRoomFun: function(index){
       var self = this
       self.selRoom = self.rooms[index]
     },
     getRooms: function(){
       var self = this
-      axios.get(getUrl() + 'rooms/')
+      axios.get(getUrl() + 'rooms/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
           // console.log(response.data)
           if (Array.isArray(response.data))
@@ -111,12 +139,12 @@ export default {
       self.weeks[0] = []
       for (var i=0; i < self.getNumDay(date); i++)
       {
-        self.weeks[0].push({})
+        self.weeks[0].push([])
       }
       var count = 0
       while (date.getMonth() == self.currentMonth)
       {
-        self.weeks[count].push({calcNumber: date.getDate()})
+        self.weeks[count].push([date.getDate()])
         if (self.getNumDay(date) % 7 == 6)
         {
           count++
@@ -124,6 +152,35 @@ export default {
         }
         date.setDate(date.getDate()+1)
       }
+      console.log(self.weeks)
+    },
+
+    addEventsToCal: function(){
+      var self = this
+      // console.log(self.weeks)
+      var calendar = self.weeks
+      calendar.forEach(function(week) {
+        week.forEach(function(day){
+          // console.log(self.eventsMonth)
+          if (day[0]){
+            self.eventsMonth.forEach(function(event)
+            {
+              var dateEv = new Date(event.time_start)
+              var date = new Date(self.currentYear, self.currentMonth+1, day[0])
+              // console.log(date)
+              if (dateEv.getDate() === day[0])
+              {
+                  // console.log(day)
+                  var str = ''
+                  var start = dateEv.getHours()
+                  start +=':' + date.getMinutes() + '-'
+                  day.push(start)
+                  
+              }
+            })
+          }
+        })
+      });
     },
     getNumDay: function(date){
       var self = this
@@ -157,7 +214,7 @@ export default {
         self.currentMonth = 0
         self.currentYear += 1
       }
-      self.getArrayCalendar()
+      self.getEventsMonth()
       
     },
     minusMonth: function(){
@@ -167,7 +224,7 @@ export default {
         self.currentMonth = 11
         self.currentYear -= 1
       }
-      self.getArrayCalendar()
+      self.getEventsMonth()
     },
     firstMonday: function(){
       var self = this 
@@ -212,11 +269,13 @@ export default {
         return false
       }
     },
+
   },
   created(){
     this.getMonthYear()
-    this.getArrayCalendar()
+    this.getEventsMonth()
     this.getRooms()
+
   }
 }
 </script>

@@ -136,7 +136,7 @@ export default {
         data.append('pass', self.pass)
         axios.post(getUrl() + 'users/', data, axConf)
             .then(function (response) {
-            console.log(response.data);
+            // console.log(response.data);
             if (response.data === 1)
             {
                 self.success = 'success'

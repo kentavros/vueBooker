@@ -18,7 +18,7 @@
         </div>
       </div>
 
-      <calendar :role="user.role"></calendar>
+      <calendar :role="user.role" :user="user"></calendar>
 
       <div class="footer">
           &nbsp;

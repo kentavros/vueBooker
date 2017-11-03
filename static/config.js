@@ -7,7 +7,7 @@ var axConf = {
 }
 //Get connection http
 function getUrl() {
-    return homeU
+    return classU
 }
 //Get the order of days of the week
 function getWeekDays(str){
