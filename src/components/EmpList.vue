@@ -126,7 +126,8 @@ export default {
       if (localStorage['user'])
       {
         self.user = JSON.parse(localStorage['user'])
-        axios.get(getUrl() + 'users/' + self.user.id)
+        axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id +
+        '/id/' + self.user.id)
             .then(function (response) {
               // console.log(response.data)
               if (Array.isArray(response.data))

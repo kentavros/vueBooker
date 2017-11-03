@@ -1,8 +1,17 @@
 <template>
   <div class="calendar">
-      
+    <p class="alert-danger" style="text-align: center;">{{errorMsg}}</p>
     <div class="row">
       <div class="shadow col-md-10">
+          <p class="rooms">
+            <button v-for="(room,index) in rooms" v-on:click="selRoomFun(index)" class="btnRoom btn btn-info btn-lg" 
+            :class="{selBtn: room.id == selRoom.id}">
+              {{room.name}}
+            </button>
+          </p>
+          <p class="roomSel">
+            Your location is: <strong>{{selRoom.name}}</strong>
+          </p>
         <div class="title">
           <button v-on:click="minusMonth()" class="btn btn-default">&#9668;</button>
           <p>{{getMonth[currentMonth]}} {{currentYear}}</p>
@@ -48,6 +57,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'calendar',
   props: ['role'],
@@ -61,13 +71,32 @@ export default {
       currentYear: '',
       weekDays: 'sun',
       nameMonth: 'en',
-      rooms: ''
+      rooms: [],
+      selRoom: {}
     }
   },
   methods:{
-    test: function(str){
+    selRoomFun: function(index){
       var self = this
-      alert(str)
+      self.selRoom = self.rooms[index]
+    },
+    getRooms: function(){
+      var self = this
+      axios.get(getUrl() + 'rooms/')
+          .then(function (response) {
+          // console.log(response.data)
+          if (Array.isArray(response.data))
+          {
+            self.rooms = response.data
+            self.selRoom = self.rooms[0]
+          }
+          else{
+            self.errorMsg = response.data
+          }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
     },
     getMonthYear: function()
     {
@@ -187,6 +216,7 @@ export default {
   created(){
     this.getMonthYear()
     this.getArrayCalendar()
+    this.getRooms()
   }
 }
 </script>
@@ -244,5 +274,23 @@ td:hover{
 .btn-Book-Emp button{
   margin-top: 70px;
   width: 115px;
+}
+.btnRoom{
+  border-radius: 0;
+}
+.selBtn{
+    color: red;
+}
+.rooms{
+  margin: 0;
+  background-color: #d9edf7;
+  text-align: center;
+}
+.roomSel{
+  margin: 0;
+  background-color: #d9edf7;
+  text-align: center;
+  color: darkblue;
+  font-size: 18px;
 }
 </style>

@@ -63,6 +63,7 @@ export default {
               localStorage['user'] = JSON.stringify(self.$parent.user)
               self.$parent.user.login = response.data.login
               self.$parent.user.role = response.data.role
+              self.$parent.user.userName = response.data.username
               self.$parent.checkUser=1
             }
             else {

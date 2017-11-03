@@ -5,10 +5,17 @@
     </div>
     <div v-else>
       <div class="header">
-        Hello, <strong>{{user.userName}}</strong>!
-        <p>
-          <button v-on:click="logout()" class="btn btn-info">logout</button>
-        </p>
+        <div class="row">
+          <div class="title col-md-10">
+              Boardroom Booker
+          </div>
+          <div class="col-md-2">
+            Hello, <strong>{{user.userName}}</strong>!
+            <p>
+              <button v-on:click="logout()" class="btn btn-info">logout</button>
+            </p>
+          </div>
+        </div>
       </div>
 
       <calendar :role="user.role"></calendar>
@@ -17,10 +24,6 @@
           &nbsp;
       </div>
     </div>
-    
-
-  
-
   </div>
 </template>
 
@@ -58,9 +61,9 @@ export default {
       if (localStorage['user'])
       {
         self.user = JSON.parse(localStorage['user'])
-        axios.get(getUrl() + 'users/' + self.user.id)
+        axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id +
+        '/id/' + self.user.id)
             .then(function (response) {
-              // console.log(response.data)
               if (Array.isArray(response.data)){
                 if (self.user.hash === response.data[0].hash)
                 {
@@ -107,11 +110,15 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .header{
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 .footer{
   margin-top: 30px;
   margin-bottom: 30px;
+}
+.title{
+  font-size: 35px;
+  text-align: center;
 }
 </style>
