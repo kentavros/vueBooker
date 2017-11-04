@@ -47,7 +47,7 @@
             </div>
           </div>
           <div class="btn-Book-Emp">
-            <router-link :to="{name: 'BookIt', params:{id: selRoom.id}}"><button class="btn btn-success">Book It!</button></router-link>
+            <router-link :to="{ name: 'BookIt', params: { id: selRoom.id }}"><button class="btn btn-success">Book It!</button></router-link>
             <router-link v-if="user.role == 'admin'" to="/emplist">
               <button class="btn btn-danger">Employee List</button>
             </router-link>
@@ -62,6 +62,7 @@
 
 <script>
 import axios from 'axios'
+import BookIt from './BookIt'
 export default {
   name: 'calendar',
   props: ['user'],
@@ -114,7 +115,7 @@ export default {
           if (Array.isArray(response.data))
           {
             self.rooms = response.data
-            self.selRoom = self.rooms[0]
+            // self.selRoom = self.rooms[0]
           }
           else{
             self.errorMsg = response.data
@@ -293,6 +294,7 @@ export default {
 
   },
   created(){
+    this.selRoom.id = 1
     this.getMonthYear()
     this.getRooms()
     this.getEventsMonth()

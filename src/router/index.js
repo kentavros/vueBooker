@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Main from '@/components/Main'
 import EmpList from '@/components/EmpList'
-import BookIt from '@/components/BookIt'
+import BookIt from '@/components/BookIt/'
 
 Vue.use(Router)
 
