@@ -1,6 +1,9 @@
 <template>
   <div class="bookIt">
     <router-link class="toMain" to="/"><button class="btn btn-info">To main</button></router-link>
+    {{currentDay}}/{{currentMonth}}/{{currentYear}}
+    <br>
+    Select Year: {{selYear}} Select month: {{selMonth}} Select Day: {{selDay}}
     <div class="title1">
       Boardroom Booker
     </div>
@@ -22,22 +25,66 @@
             <div class="control-group">
               <!-- Meeting -->
               <div class="controls">
-                  <p class="help-block">2. I would like to book the meeting:</p>
-                  <select >
-                      <option>Jan</option>
+                  <p class="help-block">2. I would like to book the meeting (on weekends can not assign an event):</p>
+                  <select v-model="selMonth">
+                      <option v-for="mon in nameMonth" :value="mon.id">{{mon.name}}</option>
                   </select>
-                  <select >
-                      <option>8</option>
+                  <select v-model="selDay">
+                      <option v-for="day in days" v-if="day.flag == 'yes'" :value="day.id">{{day.id}}</option>
+                      <option  v-else class="alert-danger" :value="day.id" disabled>{{day.id}}</option>
                   </select>
-                  <select >
-                      <option>2004</option>
+                  <select v-model="selYear">
+                      <option v-for="year in years" :value="year">{{year}}</option>
                   </select>
               </div>
             </div>
-            <div class="control-group">
-              <!-- Time Meeting -->
+
+            <div v-if="timeFormat == '1'" class="control-group">
+              <!-- Time Meeting 12-24 Format-->
               <div class="controls">
                   <p class="help-block">3. Specify what the time and end of the meeting:</p>
+                  Start:
+                  <select v-model="selTimeH_Start">
+                      <option v-for="tH_s in timeH_Start" :value="tH_s">{{tH_s}}</option>
+                  </select>
+                  <select v-model="selTimeM_Start">
+                      <option v-for="m_s in minStart" :value="m_s">{{m_s}}</option>
+                  </select>
+              </div>
+              <br>
+              <div class="controls">
+                End:
+                  <select v-model="selTimeH_End">
+                      <option v-for="tH_e in timeH_End" :value="tH_e">{{tH_e}}</option>
+                  </select>
+                  <select v-model="selTimeM_End">
+                      <option v-for="m_e in minEnd" :value="m_e">{{m_e}}</option>
+                  </select>
+              </div>
+              <br>
+              <p>
+              <button v-on:click="timeFormat = ''">set AM / PM</button>
+              </p>
+            </div>
+
+            <div v-else class="control-group">
+              <!-- Time Meeting AM - PM Fromat-->
+              <div class="controls">
+                  <p class="help-block">3. Specify what the time and end of the meeting:</p>
+                  Start:
+                  <select >
+                      <option >10</option>
+                  </select>
+                  <select >
+                      <option >00</option>
+                  </select>
+                  <select >
+                      <option >AM</option>
+                  </select>
+              </div>
+              <br>
+              <div class="controls">
+                End:
                   <select >
                       <option >8</option>
                   </select>
@@ -49,23 +96,15 @@
                   </select>
               </div>
               <br>
-              <div class="controls">
-                  <select >
-                      <option >8</option>
-                  </select>
-                  <select >
-                      <option >00</option>
-                  </select>
-                  <select >
-                      <option >AM</option>
-                  </select>
-              </div>
+              <p>
+              <button v-on:click="timeFormat = '1'">set 12 / 24</button>
+              </p>
             </div>
             <div class="control-group">
               <!-- Description Meeting -->
               <div class="controls">
                   <p class="help-block">4. Enter the specifics for the meeting:</p>
-                  <textarea rows="4" cols="25" name="description">
+                  <textarea v-model="description" rows="4" cols="25" name="description">
                   </textarea>
               </div>
             </div>
@@ -73,31 +112,33 @@
               <!-- Recurring Meeting -->
               <div class="controls">
                 <p class="help-block">5. Is this going to be a recurring event?</p>
-                <input type="radio" id="no" value="no" >
+                <input type="radio" id="no" value="no" v-model="recurring">
                 <label for="no">no</label>
                 <br>
-                <input type="radio" id="yes" value="yes" >
+                <input type="radio" id="yes" value="yes"  v-model="recurring">
                 <label for="yes">yes</label>
               </div>
             </div>
-            <div class="control-group">
+  
+            <div v-if="recurring == 'yes'" class="control-group">
               <!-- Periodicity Meeting -->
               <div class="controls">
                 <p class="help-block">6. If it is recurring, specify weekly, bi-weekly, or monthly.</p>
-                <input type="radio" id="weekly" value="weekly" >
+                <input v-on:change="selDuration=1" type="radio" id="weekly" value="weekly" v-model="recurringMethod">
                 <label for="weekly">weekly</label>
                 <br>
-                <input type="radio" id="bi-weekly" value="bi-weekly" >
+                <input v-on:change="selDuration=1" type="radio" id="bi-weekly" value="bi-weekly" v-model="recurringMethod">
                 <label for="bi-weekly">bi-weekly</label>
                 <br>
-                <input type="radio" id="monthly" value="monthly" >
+                <input v-on:change="selDuration=1" type="radio" id="monthly" value="monthly" v-model="recurringMethod">
                 <label for="monthly">monthly</label>
                 <p class="help-block">If weekly or bi-weekly, specify the number of weeks for it to keep recurring.
                   If monthly, specify the number of months. (If you choose "bi-weekly" and put in an odd number of weeks, the computer will round down.)
                 </p>
                 <br>
-                <input type="text" id="numPeriod" class="input-xlarge" style="width: 30px;">
-                <label for="numPeriod">Duration (max )</label>
+                <input  v-if="recurringMethod != 'monthly'" v-model="selDuration" v-on:input="setFilterCount(selDuration)" type="text" id="numPeriod" class="input-xlarge" style="width: 30px;">
+                <input v-else disabled v-model="selDuration" type="text" id="numPeriod" class="input-xlarge" style="width: 30px;">
+                <label for="numPeriod">Duration (max {{setCountEvent(recurringMethod)}})</label>
               </div>
             </div>
             <div class="buttons control-group">
@@ -118,17 +159,69 @@ export default {
   name: 'BookItForm',
   data () {
     return {
-      id: '',
       msg: '',
       errorMsg: '',
       room: {},
       user: {},
       users: [],
+      date: new Date(),
       bookedUser: '',
-      // meetingDate: []
+      currentDay: '',
+      currentMonth: '',
+      currentYear: '',
+      selDay: '',
+      selMonth: '',
+      selYear: '',
+      timeFormat: '1',
+      selTimeH_Start: timeStart,
+      selTimeM_Start: '',
+      selTimeH_End: '',
+      selTimeM_End: '',
+      description: '',
+      recurring: 'no',
+      recurringMethod: 'weekly',
+      selDuration: '1'
     }
   },
   methods:{
+    setFilterCount: function(count)
+    {
+      var self = this
+      count = Math.trunc(+count)
+      if (!count || count < 0){
+        self.selDuration=1
+        return true
+      }
+      if (self.recurringMethod == 'weekly')
+      {
+        if (count > 4){
+          self.selDuration=4
+          return true
+        }
+      }
+      if (self.recurringMethod == 'bi-weekly')
+      {
+        if (count > 2){
+          self.selDuration=2
+          return true
+        }
+      }
+      if (self.recurringMethod == 'monthly')
+      {
+          self.selDuration=1
+          return true
+      }
+    },
+    getDayMonthYear: function()
+    {
+      var self = this
+      self.currentDay = self.date.getDate()
+      self.currentMonth =self.date.getMonth()
+      self.currentYear = self.date.getFullYear()
+      self.selDay = self.currentDay
+      self.selMonth = self.currentMonth
+      self.selYear = self.currentYear
+    },
     getRoom: function(id){
       var self = this
       axios.get(getUrl() + 'rooms/hash/' + self.user.hash + '/id_user/' + self.user.id +
@@ -183,15 +276,12 @@ export default {
       {
         return false
       }
-      // self.msg = ''
-      // self.errorMsg = ''
       axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
           // console.log(response.data)
           if (Array.isArray(response.data))
           {
             self.users = response.data
-            console.log(self.users)
           }
           else{
             self.errorMsg = response.data
@@ -202,12 +292,29 @@ export default {
       })
 
     },
+    setCountEvent:function(str){
+      if (str == 'weekly')
+      {
+        self.selDuration = 4
+        return '4 weeks'
+      }
+      if (str == 'bi-weekly')
+      {
+        self.selDuration = 2
+        return '2 bi-weeks'
+      }
+      if (str == 'monthly')
+      {
+        self.selDuration = 1
+        return '1 month'
+      }
+    }
   },
   created(){
+    this.getDayMonthYear()
     this.checkUserFun()
     this.id = this.$route.params.id
     this.getRoom(this.id)
-    // this.getUsers()
   },
   computed: {
     usersList(){
@@ -222,6 +329,114 @@ export default {
         arr.push(self.user)
         return arr
       }
+    },
+    timeH_Start(){
+      var self = this
+      var timeH = []
+      for (var i=timeStart; i<timeEnd; i++){
+        timeH.push(i)
+      }
+      return timeH
+    },
+    timeH_End(){
+      var self = this
+      var timeH = []
+      if (self.selTimeH_Start > self.selTimeH_End)
+      {
+        self.selTimeH_End = self.selTimeH_Start
+      }
+      for (var i=self.selTimeH_Start; i<timeEnd+1; i++){
+        timeH.push(i)
+      }
+      return timeH
+    },
+    minStart(){
+      var self = this
+      var min = []
+      if (self.selTimeH_Start == self.selTimeH_End && self.selTimeM_End == min30)
+      {
+        self.selTimeM_Start = min00
+        min.push(min00)
+      }
+      else
+      {
+        min.push(min00)
+        min.push(min30)
+      }
+      return min
+    },
+    minEnd(){
+      var self = this
+      var min = []
+      if (self.selTimeH_Start == self.selTimeH_End){
+        self.selTimeM_End = min30
+        min.push(min30)
+      }
+      else if (self.selTimeH_End == timeEnd)
+      {
+        self.selTimeM_End = min00
+        min.push(min00)
+      }
+      else
+      {
+        min.push(min00)
+        min.push(min30)
+      }
+      return min
+    },
+    days(){
+      var self = this
+      var days = []
+      var date = new Date(self.selYear, self.selMonth)
+      if (self.selYear != self.currentYear || self.selMonth != self.currentMonth)
+      {
+        self.selDay = 1
+      }
+      else if (self.selYear == self.currentYear && self.selMonth == self.currentMonth)
+      {
+        self.selDay = self.currentDay
+        date.setDate(self.currentDay)
+      }
+      while(date.getMonth() == self.selMonth){
+        if (date.getDay() != 0 && date.getDay() != 6)
+        {
+          days.push({id: date.getDate(), flag: 'yes'})
+          date.setDate(date.getDate()+1)
+        }
+        else{
+          days.push({id: date.getDate(), flag: 'no'}) 
+          date.setDate(date.getDate()+1)
+        }
+      }
+      return days
+    },
+    nameMonth(){
+      var self = this
+      var nameMon = getNameMonth('en')
+      var months = []
+      if (self.selYear == self.currentYear)
+      {
+        var date = new Date(self.selYear, self.currentMonth)
+        self.selMonth = self.currentMonth
+      }
+      else{
+        var date = new Date(self.selYear)
+        self.selMonth = 0
+      }
+      for (var i=date.getMonth(); i<12; i++)
+      {
+        months.push({id: i, name: nameMon[i]})
+      }
+      return months
+
+    },
+    years(){
+      var self = this
+      var years = []
+      for (var i=0; i<5; i++){
+        years.push(self.currentYear+i)
+      }
+      return years
     }
   }
 }
@@ -240,8 +455,6 @@ export default {
   margin: auto;
 }
 .form{
-  /* position: relative;
-  top: 30px; */
   margin: auto;
   color: darkblue;
   width: 900px;
