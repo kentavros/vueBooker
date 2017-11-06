@@ -1,14 +1,12 @@
 <template>
   <div class="bookIt">
     <router-link class="toMain" to="/"><button class="btn btn-info">To main</button></router-link>
-    {{currentDay}}/{{currentMonth}}/{{currentYear}}
-    <br>
-    Select Year: {{selYear}} Select month: {{selMonth}} Select Day: {{selDay}}
     <div class="title1">
       Boardroom Booker
     </div>
+    <br>
     <div class="form">
-      <p class="alert-danger" style="text-align: center;">{{errorMsg}}</p>
+      <p v-if="errorMsg != ''" class="alert alert-danger" style="text-align: center;">{{errorMsg}}</p>
       <fieldset class="fields">
           <div class="nameRoom">
               {{room.name}}
@@ -144,8 +142,14 @@
             <div class="buttons control-group">
             <!-- Button -->
             <div class="controls">
-                <button class="btn btn-success">Submit</button>
-                <router-link to="/"><button class="btn btn-info">Cancel</button></router-link>
+            <p class="alert-info" style="text-align: center;">{{msg}}</p>
+            <div v-if="success != '1'">
+              <button v-on:click="addEvent()" class="btn btn-success">Submit</button>
+              <router-link to="/"><button class="btn btn-info">Cancel</button></router-link>
+            </div>
+            <div v-else>
+              <router-link to="/"><button class="btn btn-info">Back</button></router-link>
+            </div>
             </div>
             </div>
       </fieldset>
@@ -180,10 +184,88 @@ export default {
       description: '',
       recurring: 'no',
       recurringMethod: 'weekly',
-      selDuration: '1'
+      selDuration: '1',
+      success: ''
     }
   },
   methods:{
+    addEvent: function()
+    {
+      var self = this
+      self.errorMsg = ''
+      self.msg = ''
+      var data = new FormData()
+      //if 12-24 format events
+      if (!self.description || self.description.length < 6){
+        self.errorMsg = 'The description field can not be empty and length of the description can not be shorter than 6 characters!'
+        return false
+      }
+      if(!self.findWeekday(self.selDay)){
+        self.errorMsg = 'At the weekend the Boardroom is closed - choose another date!'
+        return false
+      }
+      if (self.timeFormat == '1'){
+        var dateTimeStart = new Date(self.selYear, self.selMonth, self.selDay, self.selTimeH_Start, self.selTimeM_Start)
+        dateTimeStart = dateTimeStart.getTime()
+        var dateTimeEnd = new Date(self.selYear, self.selMonth, self.selDay, self.selTimeH_End, self.selTimeM_End)
+        dateTimeEnd = dateTimeEnd.getTime()
+        data.append('hash', self.user.hash)
+        data.append('id_user', self.user.id)
+        data.append('booked_for', self.bookedUser)
+        data.append('id_room', self.room.id)
+        data.append('dateTimeStart', dateTimeStart)
+        data.append('dateTimeEnd', dateTimeEnd)
+        data.append('description', self.description)
+        if (self.recurring == 'yes'){
+          data.append('recurringMethod', self.recurringMethod)
+          data.append('duration', self.selDuration)
+        }
+        axios.post(getUrl() + 'events/', data, axConf)
+          .then(function (response) {
+          // console.log(response.data);
+              if (response.data === 1 || response.data === true)
+              {
+                  self.msg = 'Your event(s) - added successfully!'
+                  self.success = '1'
+              }
+              else if (Array.isArray(response.data))
+              {
+                var i = 1
+                  response.data.forEach(function(event){
+                    self.errorMsg += i + ') ' + event +'. '
+                    i++
+                  })
+                  self.msg = 'Your event(s) - added with error(s)!'
+              }
+              else
+              {
+                  self.errorMsg = response.data
+              }
+          })
+              .catch(function (error) {
+              console.log(error);
+          })
+      }
+    },
+    findWeekday: function(selDay){
+      var self = this
+      var count = 0
+      self.days.forEach(function(day){
+        if (day.id == selDay)
+        {
+          if (day.flag == 'yes'){
+            count++
+          }
+        }
+      })
+      if (count == 1)
+      {
+        return true
+      }
+      else{
+        return false
+      }
+    },
     setFilterCount: function(count)
     {
       var self = this
@@ -443,6 +525,9 @@ export default {
 </script>
 
 <style scoped>
+.toMain button{
+  margin-top: 15px;
+}
 .title1{
   font-size: 35px;
   text-align: center;
