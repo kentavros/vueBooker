@@ -43,7 +43,11 @@
                 </tr>
               </tbody>
             </table>
-          <div class="btn-section">
+          <div v-if="occurrenceSection == 'show'" class="checkA">
+              <input type="checkbox" id="checkbox" v-model="checked">
+              <label for="checkbox">Apply to all occurrences?</label>
+          </div>
+          <div v-if="access == '2' || user.id == event.id_user" class="btn-section">
             <button class="btn btn-primary">Update</button>
             <button class="btn btn-danger">Delete</button>
           </div>
@@ -67,6 +71,8 @@ export default {
       events:[],
       user: {},
       users: [],
+      occurrenceSection: '',
+      checked: ''
     }
   },
   methods: {
@@ -76,7 +82,10 @@ export default {
       self.event = self.sentEvent
       self.checkUserRole()
       self.getUsersList()
-      self.getEventsIdParent()
+      if (self.access == '2' || self.user.id == self.event.id_user)
+      {
+        self.getEventsIdParent()
+      }
     },
     checkUserRole: function(){
       var self = this
@@ -111,8 +120,38 @@ export default {
     },
     getEventsIdParent: function(){
       var self = this
-      console.log('do - get events parent')
-
+      self.errorMsg = ''
+      self.events = []
+      var requestUrl = ''
+      if (self.event.id_parent)
+      {
+        requestUrl = getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id + 
+      '/flag/parent/id/' + self.event.id_parent 
+      }
+      else
+      {
+        requestUrl = getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id + 
+      '/flag/parent/id/' + self.event.id
+      }
+      axios.get(requestUrl)
+        .then(function (response) {
+          console.log(response.data)
+        if (Array.isArray(response.data))
+        {
+          self.events = response.data 
+          if (self.events.length > 1)
+          {
+            self.occurrenceSection = 'show'
+          }
+        }
+        else
+        {
+          self.errorMsg = response.date
+        }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   },
   created(){
@@ -175,5 +214,9 @@ h4{
 }
 th{
   width: 50px;
+}
+.checkA{
+  text-align: center;
+  margin-bottom: 10px;
 }
 </style>

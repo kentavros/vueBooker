@@ -145,7 +145,7 @@
             <p class="alert-info" style="text-align: center;">{{msg}}</p>
             <div v-if="success != '1'">
               <button v-on:click="addEvent()" class="btn btn-success">Submit</button>
-              <router-link to="/"><button class="btn btn-info">Cancel</button></router-link>
+              <router-link to="/"><button class="btn btn-info">Back</button></router-link>
             </div>
             <div v-else>
               <router-link to="/"><button class="btn btn-info">Back</button></router-link>
@@ -196,6 +196,7 @@ export default {
       self.msg = ''
       var data = new FormData()
       //if 12-24 format events
+      var date = new Date()
       if (!self.description || self.description.length < 6){
         self.errorMsg = 'The description field can not be empty and length of the description can not be shorter than 6 characters!'
         return false
@@ -206,6 +207,11 @@ export default {
       }
       if (self.timeFormat == '1'){
         var dateTimeStart = new Date(self.selYear, self.selMonth, self.selDay, self.selTimeH_Start, self.selTimeM_Start)
+        if (date.getTime() > dateTimeStart.getTime())
+        {
+          self.errorMsg = 'Can not add event! Incorrect start time specified!'
+          return false
+        }
         dateTimeStart = dateTimeStart.getTime()
         var dateTimeEnd = new Date(self.selYear, self.selMonth, self.selDay, self.selTimeH_End, self.selTimeM_End)
         dateTimeEnd = dateTimeEnd.getTime()
