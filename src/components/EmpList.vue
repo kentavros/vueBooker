@@ -119,7 +119,6 @@ export default {
       .catch(function (error) {
         console.log(error)
       })
-
     },
     checkUserFun: function(){
       var self = this

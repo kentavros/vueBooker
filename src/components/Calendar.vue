@@ -1,5 +1,13 @@
 <template>
   <div class="calendar">
+<!-- Modal Window for Events -->
+     <modalwindow v-if="showModal" :sentUser="user" :sentEvent="sentEvent"  v-on:close="showModal = false">
+       <h3 slot="header">custom header</h3>
+     </modalwindow>
+
+      
+
+<!-- Calendar -->
     <p class="alert-danger" style="text-align: center;">{{errorMsg}}</p>
     <div class="row">
       <div class="shadow col-md-10">
@@ -27,7 +35,7 @@
           <tr v-for="week in weeks">
             <td class="day" v-for="day in week" :class="{date: day[0] == currentDay}">{{day[0]}}
                 <p  class="events" v-if="day.length > 1" v-for="event in day[1]" >
-                  <router-link to="#" class="link">{{event.timeString}}</router-link>
+                  <button class="btn btn-link" v-on:click="showEvent(event)" >{{event.timeString}}</button>
                   </p>
               </td>  
           </tr>
@@ -37,10 +45,10 @@
       <div class="col-md-2">
         <div class="menu">
           <div class="right-top-menu">
-            <div class="ru-en-btn">
+            <!-- <div class="ru-en-btn">
               <button v-if="nameMonth == 'en'" v-on:click="getRu()" class="btn btn-info">Ru</button>
               <button v-else-if="nameMonth == 'ru'" v-on:click="getEn()" class="btn btn-info">En</button>
-            </div>
+            </div> -->
             <div class="mon-sun-btn">
               <button v-if="weekDays == 'sun'" v-on:click="firstMonday()" class="btn btn-info">Monday First</button>
               <button v-else-if="weekDays == 'mon'" v-on:click="firstSunday()" class="btn btn-info">Sunday First</button>
@@ -56,12 +64,13 @@
         </div>
       </div>
   </div>
-
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import Modalwindow from './Modalwindow'
+import Test from './Test'
 import BookIt from './BookIt'
 export default {
   name: 'calendar',
@@ -78,10 +87,17 @@ export default {
       nameMonth: 'en',
       rooms: [],
       selRoom: {},
-      eventsMonth: []
+      eventsMonth: [],
+      showModal: false,
+      sentEvent: {}
     }
   },
   methods:{
+    showEvent: function(event){
+      var self = this
+      self.showModal = true
+      self.sentEvent = event
+    },
     getEventsMonth: function(){
       var self = this
       self.eventsMonth = []
@@ -298,7 +314,12 @@ export default {
     this.getMonthYear()
     this.getRooms()
     this.getEventsMonth()
+  },
+  components: {
+    'Test': Test,
+    'Modalwindow': Modalwindow
   }
+
 }
 </script>
 
@@ -375,7 +396,18 @@ td:hover{
   font-size: 18px;
 }
 .events{
+  text-align: center;
   color: black;
   font-weight: normal; 
+  margin: 0;
+}
+.events button{
+  padding: 0;
+}
+
+
+.modal-header h3 {
+  margin-top: 0;
+  color: #42b983;
 }
 </style>
