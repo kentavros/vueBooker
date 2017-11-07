@@ -147,8 +147,9 @@ export default {
       if (self.checked){
         // data.checked = self.events
         // console.log(data)
-        console.log(self.prepareDataRecurringUpdateEvents(self.events))
-        return false
+        // console.log(self.prepareDataRecurringEventsForUpdate(self.events))
+        // return false
+        data.checked = self.prepareDataRecurringEventsForUpdate(self.events)
       }
       else
       {
@@ -162,6 +163,8 @@ export default {
         data.dateTimeEnd = dateTimeEnd
         data.id_room = self.event.id_room
         data.description = self.selDescription
+        // console.log(data)
+        // return false
       }
 //request
       axios.put(getUrl() + 'events/', data, axConf)
@@ -182,17 +185,31 @@ export default {
         })
     },
 
-    prepareDataRecurringUpdateEvents: function(events){
+    prepareDataRecurringEventsForUpdate: function(events){
       //Собрать такой же массив как и при единичной отправке только многомерный
       //ДАТУ НУЖНО СДЕЛАТЬ!!!!!
       var self = this
+      // console.log(self.events)
+      // return false
       var arrDataEvents = []
       events.forEach(function(el){
         var newEvent = {}
+        var date_start = new Date(el.time_start)
+        var date_end = new Date(el.time_end)
+        var dateTimeStart = new Date(date_start.getFullYear(), date_start.getMonth(), date_start.getDate(),
+        self.selTimeH_Start, self.selTimeM_Start)
+        var dateTimeEnd = new Date(date_end.getFullYear(), date_end.getMonth(), date_end.getDate(),
+        self.selTimeH_End, self.selTimeM_End)
+        dateTimeStart = dateTimeStart.getTime()
+        dateTimeEnd = dateTimeEnd.getTime()
+        
         newEvent.event_id = el.id
         newEvent.booked_for = self.selUser
         newEvent.id_room = el.id_room
         newEvent.description = self.selDescription
+        newEvent.dateTimeStart = dateTimeStart
+        newEvent.dateTimeEnd = dateTimeEnd
+        arrDataEvents.push(newEvent)
         //НЕТ ДАТЫ!!!!! для каждого эвэнта своя дата!!!!
         //ПриМер:
             // var date_start = new Date(self.event.time_start)
@@ -201,6 +218,7 @@ export default {
             // self.eventMonth = date_start.getMonth()
             // self.eventDay = date_start.getDate()
       })
+      return arrDataEvents
     },
 
     deleteEvent: function(){
@@ -212,7 +230,7 @@ export default {
       if (self.checked){
         requestUrl = getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id +
       '/id/' + self.event.id + '/checked/' + self.checked + '/id_parent/' + self.event.id_parent +
-      '/time_start/' + self.event.time_start
+      '/time_start/' + self.event.time_start + '/event_id_user/' + self.event.id_user
       }
       else
       {
