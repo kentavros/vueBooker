@@ -1,8 +1,11 @@
 <template>
   <div class="calendar">
 <!-- Modal Window for Events -->
-     <modalwindow v-if="showModal" :sentUser="user" :sentEvent="sentEvent"  v-on:close="showModal = false">
-       <h3 slot="header">custom header</h3>
+     <modalwindow 
+     v-if="showModal" 
+     :sentUser="user" :sentEvent="sentEvent" 
+     v-on:refresh="getEventsMonth()"
+      v-on:close="showModal = false">
      </modalwindow>
 
       
