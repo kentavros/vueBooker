@@ -150,6 +150,7 @@
             <div v-else>
               <router-link to="/"><button class="btn btn-info">Back</button></router-link>
             </div>
+            <p v-if="errorMsg != ''" class="alert alert-danger" style="text-align: center;">{{errorMsg}}</p>
             </div>
             </div>
       </fieldset>

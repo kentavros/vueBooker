@@ -140,10 +140,12 @@ export default {
       var data = {}
       data.hash = self.user.hash
       data.id_user = self.user.id
-      data.id = self.event.id_user
+      data.booked_for = self.event.id_user
+      data.event_id = self.event.id
       data.dateTimeStart = dateTimeStart
       data.dateTimeEnd = dateTimeEnd
       data.id_user = self.selUser
+      data.id_room = self.event.id_room
       data.description = self.selDescription
 
 
