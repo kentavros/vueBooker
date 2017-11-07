@@ -8,6 +8,7 @@
           </div>
             <h4>B.B. DETAILS</h4>
             <p v-if="errorMsg != ''" class="alert-danger" style="text-align: center;" >{{errorMsg}}</p>
+            <p v-if="msg != ''" class="alert-info" style="text-align:center">{{msg}}</p>
             <table class="table table-hover table-bordered">
               <tbody>
                 <tr>
@@ -66,7 +67,6 @@
           </div>
           </div>
           <div v-else style="text-align:center">
-            <p class="alert-info">{{msg}}</p>
             <button class="btn btn-primary" v-on:click="$emit('close')" >Close</button>
           </div>
         </div>
@@ -107,6 +107,7 @@ export default {
     updateEvent: function(){
       var self = this
       self.errorMsg = ''
+      self.msg = ''
       var timeSH = self.selTimeH_Start
       var timeSM = self.selTimeM_Start
       var timeEH = self.selTimeH_End
@@ -117,6 +118,11 @@ export default {
       }
       if (timeSH > timeEH){
         self.errorMsg = 'The end time of an event can not be earlier than the start time!'
+        return false
+      }
+      if (timeEH == timeEnd && timeEM == min30)
+      {
+        self.errorMsg = 'Error! Maximum end time' + timeEnd + ':' + min00 + '!'
         return false
       }
       var date_start = new Date(self.event.time_start)
@@ -132,31 +138,69 @@ export default {
         self.errorMsg = 'The description field can not be empty and length of the description can not be shorter than 6 characters!'
         return false
       }
+//params
 
-      var dateTimeStart = new Date(self.eventYear, self.eventMonth, self.eventDay, timeSH, timeSM)
-      var dateTimeEnd = new Date(self.eventYear, self.eventMonth, self.eventDay, timeEH, timeEM)
-      dateTimeStart = dateTimeStart.getTime()
-      dateTimeEnd = dateTimeEnd.getTime()
       var data = {}
       data.hash = self.user.hash
       data.id_user = self.user.id
-      data.booked_for = self.event.id_user
-      data.event_id = self.event.id
-      data.dateTimeStart = dateTimeStart
-      data.dateTimeEnd = dateTimeEnd
-      data.id_user = self.selUser
-      data.id_room = self.event.id_room
-      data.description = self.selDescription
-
-
+      //recurring update
+      if (self.checked){
+        // data.checked = self.events
+        // console.log(data)
+        console.log(self.prepareDataRecurringUpdateEvents(self.events))
+        return false
+      }
+      else
+      {
+        var dateTimeStart = new Date(self.eventYear, self.eventMonth, self.eventDay, timeSH, timeSM)
+        var dateTimeEnd = new Date(self.eventYear, self.eventMonth, self.eventDay, timeEH, timeEM)
+        dateTimeStart = dateTimeStart.getTime()
+        dateTimeEnd = dateTimeEnd.getTime()
+        data.booked_for = self.selUser
+        data.event_id = self.event.id
+        data.dateTimeStart = dateTimeStart
+        data.dateTimeEnd = dateTimeEnd
+        data.id_room = self.event.id_room
+        data.description = self.selDescription
+      }
+//request
       axios.put(getUrl() + 'events/', data, axConf)
         .then(function (response) {
           console.log(response.data)
-        
+          if (response.data == 1)
+          {
+            self.msg = 'Event update Successfully!'
+            self.$emit('refresh')
+          }
+          else
+          {
+            self.errorMsg = response.data
+          }
         })
           .catch(function (error) {
           console.log(error)
         })
+    },
+
+    prepareDataRecurringUpdateEvents: function(events){
+      //Собрать такой же массив как и при единичной отправке только многомерный
+      //ДАТУ НУЖНО СДЕЛАТЬ!!!!!
+      var self = this
+      var arrDataEvents = []
+      events.forEach(function(el){
+        var newEvent = {}
+        newEvent.event_id = el.id
+        newEvent.booked_for = self.selUser
+        newEvent.id_room = el.id_room
+        newEvent.description = self.selDescription
+        //НЕТ ДАТЫ!!!!! для каждого эвэнта своя дата!!!!
+        //ПриМер:
+            // var date_start = new Date(self.event.time_start)
+            // var date_end = new Date(self.event.time_end)
+            // self.eventYear = date_start.getFullYear()
+            // self.eventMonth = date_start.getMonth()
+            // self.eventDay = date_start.getDate()
+      })
     },
 
     deleteEvent: function(){
@@ -248,16 +292,17 @@ export default {
       var self = this
       self.errorMsg = ''
       self.events = []
+      // console.log(self.event)
       var requestUrl = ''
       if (self.event.id_parent)
       {
         requestUrl = getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id + 
-      '/flag/parent/id/' + self.event.id_parent 
+      '/flag/parent/id/' + self.event.id_parent + '/event_id_user/' + self.event.id_user
       }
       else
       {
         requestUrl = getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id + 
-      '/flag/parent/id/' + self.event.id
+      '/flag/parent/id/' + self.event.id + '/event_id_user/' + self.event.id_user
       }
       axios.get(requestUrl)
         .then(function (response) {
