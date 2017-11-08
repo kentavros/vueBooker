@@ -1,6 +1,6 @@
 <template>
   <div class="bookIt">
-    <router-link class="toMain" to="/"><button class="btn btn-info">To main</button></router-link>
+    <router-link class="toMain" to="/"><button class="btn btn-info" v-on:click="saveRoom()">To main</button></router-link>
     <div class="title1">
       Boardroom Booker
     </div>
@@ -104,7 +104,7 @@
               <!-- Description Meeting -->
               <div class="controls">
                   <p class="help-block">4. Enter the specifics for the meeting:</p>
-                  <textarea v-model="description" rows="4" cols="25" name="description">
+                  <textarea v-model="description" rows="4" cols="25" name="description" style="width:500px;">
                   </textarea>
               </div>
             </div>
@@ -147,10 +147,10 @@
             <p class="alert-info" style="text-align: center;">{{msg}}</p>
             <div v-if="success != '1'">
               <button v-on:click="addEvent()" class="btn btn-success">Submit</button>
-              <router-link to="/"><button class="btn btn-info">Back</button></router-link>
+              <router-link to="/"><button class="btn btn-info" v-on:click="saveRoom()">Back</button></router-link>
             </div>
             <div v-else>
-              <router-link to="/"><button class="btn btn-info">Back</button></router-link>
+              <router-link to="/"><button class="btn btn-info" v-on:click="saveRoom()">Back</button></router-link>
             </div>
             <p v-if="errorMsg != ''" class="alert alert-danger" style="text-align: center;">{{errorMsg}}</p>
             </div>
@@ -205,8 +205,15 @@ export default {
         self.selTimeM_Start = min00
         self.selTimeH_End = timeStart
         self.selTimeM_End =min30
+        self.selAmPmStart = 'am'
+        self.selAmPmEnd = 'am'
       }
+    },
 
+    saveRoom: function()
+    {
+      var self = this
+      localStorage['room'] = JSON.stringify(self.room)
     },
 
     addEvent: function()

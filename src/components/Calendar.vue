@@ -76,7 +76,6 @@
 <script>
 import axios from 'axios'
 import Modalwindow from './Modalwindow'
-import Test from './Test'
 import BookIt from './BookIt'
 export default {
   name: 'calendar',
@@ -92,7 +91,10 @@ export default {
       weekDays: 'sun',
       nameMonth: 'en',
       rooms: [],
-      selRoom: {},
+      selRoom: {
+        id: '1',
+        name: ''
+      },
       eventsMonth: [],
       showModal: false,
       sentEvent: {},
@@ -129,6 +131,9 @@ export default {
             self.eventsMonth = response.data
             self.getArrayCalendar()
           }
+          else{
+            self.getArrayCalendar()
+          }
       })
       .catch(function (error) {
         console.log(error)
@@ -146,6 +151,14 @@ export default {
           if (Array.isArray(response.data))
           {
             self.rooms = response.data
+            if (!localStorage['room'])
+            {
+              self.selRoom = self.rooms[0]
+            }
+            else
+            {
+              self.selRoom = JSON.parse(localStorage['room'])
+            }
           }
           else{
             self.errorMsg = response.data
@@ -356,13 +369,12 @@ export default {
 
   },
   created(){
-    this.selRoom.id = 1
+    // this.selRoom.id = 1
     this.getMonthYear()
     this.getRooms()
     this.getEventsMonth()
   },
   components: {
-    'Test': Test,
     'Modalwindow': Modalwindow
   }
 

@@ -46,6 +46,7 @@ export default {
       if (localStorage['user'])
       {
         delete localStorage['user']
+        delete localStorage['room']
         self.user = {},
         self.checkUser = ''
         return true

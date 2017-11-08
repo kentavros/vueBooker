@@ -60,6 +60,9 @@
             </div>
             </div>
         
+            <div v-if="success === 'success'" class="success">
+              <h4 class="alert alert-info">User <strong>"{{selUser.username}}"</strong> edit success!</h4>
+            </div>
             <div class="control-group">
             <!-- Button -->
             <div v-if="success == ''" class="controls">
@@ -72,9 +75,6 @@
             </div>
         </fieldset>
     
-    <div v-if="success === 'success'" class="success">
-      <h4 class="alert alert-info">User <strong>"{{selUser.username}}"</strong> edit success!</h4>
-    </div>
     </div>
 
   </div>
