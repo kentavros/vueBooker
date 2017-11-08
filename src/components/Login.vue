@@ -68,6 +68,10 @@ export default {
             }
             else {
               self.errorMsg = response.data
+              if (self.errorMsg == 'Nothing found')
+              {
+                self.errorMsg = 'Error, check password and login'
+              }
             }
           })
           .catch(function (error) {

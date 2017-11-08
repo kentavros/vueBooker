@@ -96,7 +96,7 @@
               <label for="checkbox">Apply to all occurrences?</label>
           </div>
           <div v-if="success != 'success'">
-          <div v-if="access == '2' || user.id == event.id_user" class="btn-section">
+          <div v-if="(access == '2' || user.id == event.id_user) && Date.now() < Date.parse(sentEvent.time_start)" class="btn-section">
             <button class="btn btn-primary" v-on:click="updateEvent()">Update</button>
             <button class="btn btn-danger" v-on:click="deleteEvent()">Delete</button>
           </div>
@@ -274,17 +274,21 @@ export default {
         requestUrl = getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id +
       '/id/' + self.event.id
       }
+      var minStart = (self.selTimeM_Start == 0)? '00' : self.selTimeM_Start
+      var minEnd = (self.selTimeM_End ==0)? '00' : self.selTimeM_End
       axios.delete(requestUrl)
           .then(function (response) {
           if (response.data == 1)
           {
-            self.msg = 'User Event "'+ self.event.user_name +'", Delete Successfully!'
+            self.msg = 'The event '+ self.selTimeH_Start + ':'+ minStart +
+            '-'+self.selTimeH_End + ':' + minEnd +' has been removed!'
             self.success = 'success'
             self.$emit('refresh')
           }
           else if (response.data > 1)
           {
-            self.msg ='"' + response.data + '" - Events Delete Successfully!'
+            self.msg ='The events (quantity - "'+ response.data +'") '+ self.selTimeH_Start + ':'+ minStart +
+            '-'+self.selTimeH_End + ':' + minEnd +' has been removed!'
             self.success = 'success'
             self.$emit('refresh')
           }

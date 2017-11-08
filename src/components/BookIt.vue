@@ -145,6 +145,7 @@
             <!-- Button -->
             <div class="controls">
             <p class="alert-info" style="text-align: center;">{{msg}}</p>
+            <p v-if="errorMsg != ''" class="alert alert-danger" style="text-align: center;">{{errorMsg}}</p>
             <div v-if="success != '1'">
               <button v-on:click="addEvent()" class="btn btn-success">Submit</button>
               <router-link to="/"><button class="btn btn-info" v-on:click="saveRoom()">Back</button></router-link>
@@ -152,7 +153,6 @@
             <div v-else>
               <router-link to="/"><button class="btn btn-info" v-on:click="saveRoom()">Back</button></router-link>
             </div>
-            <p v-if="errorMsg != ''" class="alert alert-danger" style="text-align: center;">{{errorMsg}}</p>
             </div>
             </div>
       </fieldset>
@@ -254,10 +254,11 @@ export default {
         }
         axios.post(getUrl() + 'events/', data, axConf)
           .then(function (response) {
-          // console.log(response.data);
               if (response.data === 1 || response.data == true)
               {
-                  self.msg = 'Your event(s) - added successfully!'
+                  self.msg = 'The event '+ self.selTimeH_Start +':'+ self.selTimeM_Start + '-'+
+                    self.selTimeH_End + ':' + self.selTimeM_End +' - has been added successfully! The text for this event is "'+
+                    self.description + '"'
                   self.success = '1'
               }
               else if (Array.isArray(response.data))
@@ -267,7 +268,7 @@ export default {
                     self.errorMsg += i + ') ' + event +'. '
                     i++
                   })
-                  self.msg = 'Your event(s) - added with error(s)!'
+                  self.msg = 'Your events - added with Errors!'
               }
               else
               {
