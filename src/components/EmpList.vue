@@ -42,7 +42,6 @@
     <div v-else-if="addUser == 1">
       <add-user></add-user>
     </div>
-
   </div>
 </template>
 
@@ -84,7 +83,6 @@ export default {
       axios.delete(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id +
         '/id/' + self.users[index].id)
           .then(function (response) {
-          // console.log(response.data)
           if (response.data === 1)
           {
             self.getUsersList()
@@ -107,7 +105,6 @@ export default {
       self.errorMsg = ''
       axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
-          // console.log(response.data)
           if (Array.isArray(response.data))
           {
             self.users = response.data
@@ -128,7 +125,6 @@ export default {
         axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id +
         '/id/' + self.user.id)
             .then(function (response) {
-              // console.log(response.data)
               if (Array.isArray(response.data))
               {
                 if (self.user.hash === response.data[0].hash)

@@ -2,7 +2,6 @@
   <div class="editUser">
   <div class="regForm">
       <p class="alert-danger">{{errorMsg}}</p>
-      
         <fieldset>
             <div id="legend">
             <legend class="title">Edit User Information</legend>
@@ -167,18 +166,15 @@ export default {
           .catch(function (error) {
           console.log(error)
         })
-
       }
       else{
         self.errorMsg =  'Enter data in all fields!'
       }
-
     }
   },
   created(){
     this.getSelUser()
   }
-
 }
 </script>
 

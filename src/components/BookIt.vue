@@ -222,7 +222,6 @@ export default {
       self.errorMsg = ''
       self.msg = ''
       var data = new FormData()
-      //if 12-24 format events
       var date = new Date()
       if (!self.description || self.description.length < 6){
         self.errorMsg = 'The description field can not be empty and length of the description can not be shorter than 6 characters!'
@@ -367,7 +366,6 @@ export default {
                 if (self.user.hash === response.data[0].hash)
                 {
                   self.user = response.data[0]
-
                   self.getUsers()
                 }
               }
@@ -392,7 +390,6 @@ export default {
       }
       axios.get(getUrl() + 'users/hash/' + self.user.hash + '/id_user/' + self.user.id)
           .then(function (response) {
-          // console.log(response.data)
           if (Array.isArray(response.data))
           {
             self.users = response.data
@@ -587,7 +584,6 @@ export default {
         months.push({id: i, name: nameMon[i]})
       }
       return months
-
     },
     years(){
       var self = this

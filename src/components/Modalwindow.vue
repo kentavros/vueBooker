@@ -14,7 +14,7 @@
                 <!-- 12-24 Format -->
                 <tr v-if="timeFormat != 'am-pm'">
                   <th>When:</th>
-                  <td v-if="access == '2' && success != 'success' || user.id == event.id_user && success != 'success'">
+                  <td v-if="(access == '2' || user.id == event.id_user) && success != 'success' && Date.now() < Date.parse(sentEvent.time_start)">
                     <select v-model="selTimeH_Start">
                       <option v-for="tH_s in timeH_S" :value="tH_s">{{tH_s}}</option>
                     </select>
@@ -36,10 +36,10 @@
                   </td>
                 </tr>
 
-                <!-- AM PM Format -->
+                <!-- AM-PM Format -->
                 <tr v-else>
                   <th>When:</th>
-                  <td v-if="access == '2' && success != 'success' || user.id == event.id_user && success != 'success'">
+                  <td v-if="(access == '2' || user.id == event.id_user) && success != 'success' && Date.now() < Date.parse(sentEvent.time_start)">
                     <select v-model="selTimeH_Start">
                       <option v-for="tAmPmS in timeAMPM_Start" :value="tAmPmS.val">{{tAmPmS.title}}</option>
                     </select>
@@ -70,19 +70,19 @@
                 </tr>
                 <tr>
                   <th>Notes:</th>
-                  <td v-if="access == '2' && success != 'success' || user.id == event.id_user && success != 'success'">
+                  <td v-if="(access == '2' || user.id == event.id_user) && success != 'success' && Date.now() < Date.parse(sentEvent.time_start)">
                     <input type="text" v-model="selDescription" :value="event.description">
                   </td>
                   <td v-else>{{event.description}}</td>
                 </tr>
                 <tr>
                   <th>Who:</th>
-                  <td v-if="event.user_name && access == '2' && success != 'success'">
+                  <td v-if="event.user_name && access == '2' && success != 'success' && Date.now() < Date.parse(sentEvent.time_start)">
                     <select class="selUser" v-model="selUser">
                         <option v-for="user in users" :value="user.id">{{user.username}}</option>
                     </select>
                   </td>
-                  <td v-else-if="event.user_name && access == '1' && success != 'success'">{{event.user_name}}</td>
+                  <td v-else-if="event.user_name && access == '1' && success != 'success' && Date.now() < Date.parse(sentEvent.time_start)">{{event.user_name}}</td>
                   <td v-else-if="!event.user_name" class="alert-danger">The user has been removed</td>
                   <td v-else>{{event.user_name}}</td>
                 </tr>
@@ -91,7 +91,7 @@
                 </tr>
               </tbody>
             </table>
-          <div v-if="occurrenceSection == 'show'" class="checkA">
+          <div v-if="occurrenceSection == 'show' && Date.now() < Date.parse(sentEvent.time_start)" class="checkA">
               <input type="checkbox" id="checkbox" v-model="checked">
               <label for="checkbox">Apply to all occurrences?</label>
           </div>
@@ -149,7 +149,7 @@ export default {
       var timeSM = self.selTimeM_Start
       var timeEH = self.selTimeH_End
       var timeEM = self.selTimeM_End
-//Validate Data
+//Validate sent Data
       if (timeSH == timeEH && timeSM == timeEM){
         self.errorMsg = 'Specify the correct End date for the event!'
         return false
@@ -176,11 +176,11 @@ export default {
         self.errorMsg = 'The description field can not be empty and length of the description can not be shorter than 6 characters!'
         return false
       }
-//params
+//Set params prepare to request
       var data = {}
       data.hash = self.user.hash
       data.id_user = self.user.id
-//recurring update
+//If "checked" recurring update
       if (self.checked){
         data.timestamp = date_start.getTime()
         data.checked = self.prepareDataRecurringEventsForUpdate(self.events)
@@ -198,12 +198,13 @@ export default {
         data.id_room = self.event.id_room
         data.description = self.selDescription
       }
-//request
+      var minStart = (timeSM == 0)? '00' : timeSM
+      var minEnd = (timeEM ==0)? '00' : timeEM
       axios.put(getUrl() + 'events/', data, axConf)
         .then(function (response) {
           if (response.data == 1 || response.data == true)
           {
-            self.msg = 'Event update Successfully!'
+            self.msg = 'Event '+ timeSH+ ':'+ minStart + '-' + timeEH+ ':' + minEnd + ' update Successfully!'
             self.success = 'success'
             self.$emit('refresh')
           }
@@ -214,7 +215,7 @@ export default {
                 self.errorMsg += i + ') ' + event +'. '
                 i++
               })
-              self.msg = 'Your event(s) - Updated with error(s)!'
+              self.msg = 'Your events '+ timeSH+ ':'+ minStart + '-' + timeEH+ ':' + minEnd + ' - Updated with error(s)!'
               self.success = 'success'
               self.$emit('refresh')
           }
@@ -494,12 +495,10 @@ export default {
   display: table;
   transition: opacity .3s ease;
 }
-
 .modal-wrapper {
   display: table-cell;
   vertical-align: middle;
 }
-
 .modal-container {
   width: 330px;
   margin: 0px auto;
@@ -512,11 +511,9 @@ export default {
 .modal-enter {
   opacity: 0;
 }
-
 .modal-leave-active {
   opacity: 0;
 }
-
 .modal-enter .modal-container,
 .modal-leave-active .modal-container {
   -webkit-transform: scale(1.1);

@@ -10,16 +10,14 @@
               Boardroom Booker
           </div>
           <div class="col-md-2">
-            Hello, <strong>{{user.userName}}</strong>!
+            Welcome <br><strong>{{user.userName}}</strong>!
             <p>
               <button v-on:click="logout()" class="btn btn-info">logout</button>
             </p>
           </div>
         </div>
       </div>
-
       <calendar :role="user.role" :user="user"></calendar>
-
       <div class="footer">
           &nbsp;
       </div>
@@ -121,5 +119,9 @@ export default {
 .title{
   font-size: 35px;
   text-align: center;
+}
+.col-md-2{
+  font-size: 17px;
+  color: darkblue;
 }
 </style>

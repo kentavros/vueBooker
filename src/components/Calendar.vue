@@ -18,8 +18,11 @@
               {{room.name}}
             </button>
           </p>
-          <p class="roomSel">
+          <p v-if="nameMonth == 'en'" class="roomSel">
             Your location is: <strong>{{selRoom.name}}</strong>
+          </p>
+          <p v-else class="roomSel">
+            Вы находитесь: <strong>{{selRoom.name}}</strong>
           </p>
         <div class="title">
           <button v-on:click="minusMonth()" class="btn btn-default">&#9668;</button>
@@ -46,7 +49,7 @@
       <div class="col-md-2">
         <div class="menu">
           <div class="right-top-menu">
-            <!-- RU - EN Calendar only -->
+            <!-- RU.EN - Calendar only -->
             <div class="ru-en-btn">
               <button v-if="nameMonth == 'en'" v-on:click="getRu()" class="btn btn-info">Ru</button>
               <button v-else-if="nameMonth == 'ru'" v-on:click="getEn()" class="btn btn-info">En</button>
@@ -66,7 +69,6 @@
               <button class="btn btn-danger">Employee List</button>
             </router-link>
           </div>
-
         </div>
       </div>
   </div>
@@ -102,7 +104,6 @@ export default {
     }
   },
   methods:{
-
     getTimeFormat: function(format)
     {
       var self = this
@@ -265,7 +266,6 @@ export default {
       }
       self.getEventsMonth()
       self.getArrayCalendar()
-      
     },
     minusMonth: function(){
       var self = this
@@ -342,8 +342,6 @@ export default {
         string = t1 + t2
         return string
       }
-     
-
     }
   },
   computed: {
@@ -369,7 +367,6 @@ export default {
 
   },
   created(){
-    // this.selRoom.id = 1
     this.getMonthYear()
     this.getRooms()
     this.getEventsMonth()
@@ -377,7 +374,6 @@ export default {
   components: {
     'Modalwindow': Modalwindow
   }
-
 }
 </script>
 
@@ -464,11 +460,5 @@ td:hover{
 }
 .events button{
   padding: 0;
-}
-
-
-.modal-header h3 {
-  margin-top: 0;
-  color: #42b983;
 }
 </style>

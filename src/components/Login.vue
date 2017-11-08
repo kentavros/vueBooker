@@ -55,7 +55,7 @@ export default {
             login: self.login,
             pass: self.pass
           }, axConf)
-          .then(function (response) {
+            .then(function (response) {
             if (response.data.id && response.data.hash)
             {
               self.$parent.user.id = response.data.id
@@ -111,5 +111,4 @@ export default {
 .alert-danger{
     text-align: center
 }
-
 </style>
