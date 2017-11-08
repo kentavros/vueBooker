@@ -181,14 +181,17 @@ export default {
 <style scoped>
 .editUser{
   text-align: center;
+  height: 770px;
+  background-image: url(/static/img/edit_user.jpg);
+  background-size: cover;
 }
 .regForm{
   position: relative;
-  top: 30px;
+  top: 100px;
   margin: auto;
   color: darkblue;
   width: 550px;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.9);
   padding-bottom: 10px;
 }
 .title{
