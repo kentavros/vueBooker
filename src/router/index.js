@@ -19,7 +19,7 @@ export default new Router({
       component: EmpList
     },
     {
-      path: '/bookit/:id',
+      path: '/bookit/:id/:time',
       name: 'BookIt',
       component: BookIt
     }

@@ -37,7 +37,7 @@
               </div>
             </div>
 
-            <div v-if="timeFormat == '1'" class="control-group">
+            <div v-if="selTimeFormat == '12-24'" class="control-group">
               <!-- Time Meeting 12-24 Format-->
               <div class="controls">
                   <p class="help-block">3. Specify what the time and end of the meeting:</p>
@@ -61,7 +61,7 @@
               </div>
               <br>
               <p>
-              <button v-on:click="timeFormat = ''">set AM / PM</button>
+              <button v-on:click="getTimeFormat('am-pm')">set AM / PM</button>
               </p>
             </div>
 
@@ -70,32 +70,34 @@
               <div class="controls">
                   <p class="help-block">3. Specify what the time and end of the meeting:</p>
                   Start:
-                  <select >
-                      <option >10</option>
+                  <select v-model="selTimeH_Start">
+                      <option v-for="tH_s in timeH_Start" :value="tH_s.val">{{tH_s.title}}</option>
                   </select>
-                  <select >
-                      <option >00</option>
+                  <select v-model="selTimeM_Start">
+                      <option v-for="m_s in minStart" :value="m_s">{{m_s}}</option>
                   </select>
-                  <select >
-                      <option >AM</option>
+                  <select v-model="selAmPmStart">
+                      <option value="am">AM</option>
+                      <option value="pm">PM</option>
                   </select>
               </div>
               <br>
               <div class="controls">
                 End:
-                  <select >
-                      <option >8</option>
+                  <select v-model="selTimeH_End">
+                      <option v-for="tH_e in timeH_End" :value="tH_e.val">{{tH_e.title}}</option>
                   </select>
-                  <select >
-                      <option >00</option>
+                  <select v-model="selTimeM_End">
+                      <option v-for="m_e in minEnd" :value="m_e">{{m_e}}</option>
                   </select>
-                  <select >
-                      <option >AM</option>
+                  <select v-model="selAmPmEnd">
+                      <option value="am">AM</option>
+                      <option value="pm">PM</option>
                   </select>
               </div>
               <br>
               <p>
-              <button v-on:click="timeFormat = '1'">set 12 / 24</button>
+              <button v-on:click="getTimeFormat('12-24')">set 12 / 24</button>
               </p>
             </div>
             <div class="control-group">
@@ -166,6 +168,8 @@ export default {
     return {
       msg: '',
       errorMsg: '',
+      id: '',
+      selTimeFormat: '',
       room: {},
       user: {},
       users: [],
@@ -177,7 +181,8 @@ export default {
       selDay: '',
       selMonth: '',
       selYear: '',
-      timeFormat: '1',
+      selAmPmStart: 'am',
+      selAmPmEnd: 'am',
       selTimeH_Start: timeStart,
       selTimeM_Start: '',
       selTimeH_End: '',
@@ -190,6 +195,20 @@ export default {
     }
   },
   methods:{
+    getTimeFormat: function(param)
+    {
+      var self = this
+      self.selTimeFormat = param
+      if (param == 'am-pm')
+      {
+        self.selTimeH_Start = timeStart
+        self.selTimeM_Start = min00
+        self.selTimeH_End = timeStart
+        self.selTimeM_End =min30
+      }
+
+    },
+
     addEvent: function()
     {
       var self = this
@@ -206,7 +225,6 @@ export default {
         self.errorMsg = 'At the weekend the Boardroom is closed - choose another date!'
         return false
       }
-      if (self.timeFormat == '1'){
         var dateTimeStart = new Date(self.selYear, self.selMonth, self.selDay, self.selTimeH_Start, self.selTimeM_Start)
         if (date.getTime() > dateTimeStart.getTime())
         {
@@ -230,7 +248,7 @@ export default {
         axios.post(getUrl() + 'events/', data, axConf)
           .then(function (response) {
           // console.log(response.data);
-              if (response.data === 1 || response.data === true)
+              if (response.data === 1 || response.data == true)
               {
                   self.msg = 'Your event(s) - added successfully!'
                   self.success = '1'
@@ -252,7 +270,6 @@ export default {
               .catch(function (error) {
               console.log(error);
           })
-      }
     },
     findWeekday: function(selDay){
       var self = this
@@ -403,6 +420,7 @@ export default {
     this.getDayMonthYear()
     this.checkUserFun()
     this.id = this.$route.params.id
+    this.getTimeFormat(this.selTimeFormat = this.$route.params.time)
     this.getRoom(this.id)
   },
   computed: {
@@ -422,22 +440,66 @@ export default {
     timeH_Start(){
       var self = this
       var timeH = []
-      for (var i=timeStart; i<timeEnd; i++){
-        timeH.push(i)
+      if (self.selTimeFormat == 'am-pm')
+      {
+        if (self.selAmPmStart == 'am'){
+          for(var i=timeStart; i<timeNoon; i++){
+            timeH.push({val: i, title: i})
+          }
+          return timeH
+        }
+        else if (self.selAmPmStart == 'pm'){
+          for(var i=timeNoon; i<timeEnd; i++){
+            var objTime = {}
+            objTime.val = i
+            objTime.title = (i != timeNoon) ? i-timeNoon : timeNoon
+            timeH.push(objTime)
+          }
+          self.selTimeH_Start = timeNoon
+          return timeH
+        }
       }
-      return timeH
+      else
+      {
+        for (var i=timeStart; i<timeEnd; i++){
+          timeH.push(i)
+        }
+        return timeH
+      }
     },
     timeH_End(){
       var self = this
       var timeH = []
-      if (self.selTimeH_Start > self.selTimeH_End)
+      if (self.selTimeFormat == 'am-pm')
       {
-        self.selTimeH_End = self.selTimeH_Start
+        if (self.selAmPmEnd == 'am'){
+          for(var i=timeStart; i<timeNoon; i++){
+            timeH.push({val: i, title: i})
+          }
+          return timeH
+        }
+        else if (self.selAmPmEnd == 'pm'){
+          for(var i=timeNoon; i<timeEnd+1; i++){
+            var objTime = {}
+            objTime.val = i
+            objTime.title = (i != timeNoon) ? i-timeNoon : timeNoon
+            timeH.push(objTime)
+          }
+          self.selTimeH_End = timeNoon
+          return timeH
+        }
       }
-      for (var i=self.selTimeH_Start; i<timeEnd+1; i++){
-        timeH.push(i)
+      else
+      {
+        if (self.selTimeH_Start > self.selTimeH_End)
+        {
+          self.selTimeH_End = self.selTimeH_Start
+        }
+        for (var i=self.selTimeH_Start; i<timeEnd+1; i++){
+          timeH.push(i)
+        }
+        return timeH
       }
-      return timeH
     },
     minStart(){
       var self = this

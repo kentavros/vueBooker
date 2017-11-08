@@ -3,12 +3,10 @@
 <!-- Modal Window for Events -->
      <modalwindow 
      v-if="showModal" 
-     :sentUser="user" :sentEvent="sentEvent" 
+     :sentUser="user" :sentEvent="sentEvent" :timeFormat="selTimeFormat" 
      v-on:refresh="getEventsMonth()"
       v-on:close="showModal = false">
      </modalwindow>
-
-      
 
 <!-- Calendar -->
     <p class="alert-danger" style="text-align: center;">{{errorMsg}}</p>
@@ -48,17 +46,22 @@
       <div class="col-md-2">
         <div class="menu">
           <div class="right-top-menu">
-            <!-- <div class="ru-en-btn">
+            <!-- RU - EN Calendar only -->
+            <div class="ru-en-btn">
               <button v-if="nameMonth == 'en'" v-on:click="getRu()" class="btn btn-info">Ru</button>
               <button v-else-if="nameMonth == 'ru'" v-on:click="getEn()" class="btn btn-info">En</button>
-            </div> -->
+            </div>
+            <div class="am-pm-btn">
+              <button v-if="selTimeFormat == '12-24'" v-on:click="getTimeFormat('am-pm')" class="btn btn-info">AM-PM</button>
+              <button v-else-if="selTimeFormat == 'am-pm'" v-on:click="getTimeFormat('12-24')" class="btn btn-info">12-24</button>
+            </div>
             <div class="mon-sun-btn">
               <button v-if="weekDays == 'sun'" v-on:click="firstMonday()" class="btn btn-info">Monday First</button>
               <button v-else-if="weekDays == 'mon'" v-on:click="firstSunday()" class="btn btn-info">Sunday First</button>
             </div>
           </div>
           <div class="btn-Book-Emp">
-            <router-link :to="{ name: 'BookIt', params: { id: selRoom.id }}"><button class="btn btn-success">Book It!</button></router-link>
+            <router-link :to="{ name: 'BookIt', params: { id: selRoom.id, time: selTimeFormat }}"><button class="btn btn-success">Book It!</button></router-link>
             <router-link v-if="user.role == 'admin'" to="/emplist">
               <button class="btn btn-danger">Employee List</button>
             </router-link>
@@ -92,15 +95,25 @@ export default {
       selRoom: {},
       eventsMonth: [],
       showModal: false,
-      sentEvent: {}
+      sentEvent: {},
+      selTimeFormat: '12-24'
     }
   },
   methods:{
+
+    getTimeFormat: function(format)
+    {
+      var self = this
+      self.selTimeFormat = format
+      self.getEventsMonth()
+    },
+
     showEvent: function(event){
       var self = this
       self.showModal = true
       self.sentEvent = event
     },
+
     getEventsMonth: function(){
       var self = this
       self.eventsMonth = []
@@ -115,7 +128,6 @@ export default {
           {
             self.eventsMonth = response.data
             self.getArrayCalendar()
-            
           }
       })
       .catch(function (error) {
@@ -134,7 +146,6 @@ export default {
           if (Array.isArray(response.data))
           {
             self.rooms = response.data
-            // self.selRoom = self.rooms[0]
           }
           else{
             self.errorMsg = response.data
@@ -189,23 +200,9 @@ export default {
               if (dateEvStart.getDate() === day[0])
               {
                   var str = ''
-                  var start = dateEvStart.getHours()
-                  var end = dateEvEnd.getHours()
-                  if (dateEvStart.getMinutes() == 0)
-                  {
-                  start +=':' + dateEvStart.getMinutes() + '0-'
-                  }
-                  else{
-                  start +=':' + dateEvStart.getMinutes() + '-'
-                  }
-                  if (dateEvEnd.getMinutes() == 0)
-                  {
-                    end += ':' + dateEvEnd.getMinutes() + '0'
-                  }
-                  else{
-                    end += ':' + dateEvEnd.getMinutes() 
-                  }
-                  str = start + end
+                  var stringTime = self.formatTimeNumberToString(dateEvStart.getHours(), dateEvStart.getMinutes(),
+                  dateEvEnd.getHours(), dateEvEnd.getMinutes())
+                  str = stringTime
                   event.timeString = str
                   if (day.length == 1)
                   {
@@ -288,6 +285,52 @@ export default {
       self.nameMonth = 'en'
       self.weekDays = 'sun'
       self.getArrayCalendar()
+    },
+    formatTimeNumberToString: function(sh, sm, eh, em)
+    {
+      var self = this
+      var string = ''
+      if (self.selTimeFormat == '12-24')
+      {
+        string = sh
+        string += (sm == 0) ? ':00-' : ':'+ sm +'-'
+        string += eh
+        string += (em == 0) ? ':00' : ':'+ em
+        return string
+      }
+      else{
+        var t1 =''
+        var t2 = ''
+        if (sh < 12){
+          t1 = sh
+          t1 += (sm == 0) ? ':00am-' : ':'+ sm + 'am-'
+        }
+        else if (sh == 12){
+          t1 = sh
+          t1 += (sm == 0) ? ':00pm-' : ':'+ sm + 'pm-'
+        }
+        else if (sh > 12){
+          t1 = +sh-12
+          t1 += (sm == 0) ? ':00pm-' : ':'+ sm + 'pm-'
+        }
+        if (eh < 12){
+          t2 = eh
+          t2 += (em == 0) ? ':00am' : ':'+ em + 'am'
+        }
+        else if (eh == 12){
+          t2 = eh
+          t2 += (em == 0) ? ':00pm' : ':'+ em + 'pm'
+        }
+        else if (eh > 12)
+        {
+          t2 = +eh-12
+          t2 += (em == 0) ? ':00pm' : ':'+ em + 'pm'
+        }
+        string = t1 + t2
+        return string
+      }
+     
+
     }
   },
   computed: {
@@ -364,6 +407,9 @@ td:hover{
   background: #c7e3f1;
 }
 .ru-en-btn{
+  margin-bottom: 15px;
+}
+.am-pm-btn{
   margin-bottom: 15px;
 }
 .mon-sun-btn{

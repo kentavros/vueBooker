@@ -76,7 +76,7 @@ export default {
       var self = this
       self.msg = ''
       self.errorMsg = ''
-      var result = confirm('Do you want to remove user "'+ self.users[index].username + '"?');
+      var result = confirm('Do you want to remove user "'+ self.users[index].username + '"?')
       if (!result)
       {
         return false

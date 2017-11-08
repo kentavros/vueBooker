@@ -2,7 +2,7 @@
   <transition name="modal">
     <div class="modal-mask">
       <div class="modal-wrapper">
-        <div class="modal-container">
+        <div class="modal-container" :class="{plusWidth: timeFormat == 'am-pm'}">
           <div class="btnclose">
           <button class="btn-danger btn-xs" type="button" v-on:click="$emit('close')" >X</button>
           </div>
@@ -11,9 +11,10 @@
             <p v-if="msg != ''" class="alert-info" style="text-align:center">{{msg}}</p>
             <table class="table table-hover table-bordered">
               <tbody>
-                <tr>
+                <!-- 12-24 Format -->
+                <tr v-if="timeFormat != 'am-pm'">
                   <th>When:</th>
-                  <td v-if="access == '2' || user.id == event.id_user">
+                  <td v-if="access == '2' && success != 'success' || user.id == event.id_user && success != 'success'">
                     <select v-model="selTimeH_Start">
                       <option v-for="tH_s in timeH_S" :value="tH_s">{{tH_s}}</option>
                     </select>
@@ -34,22 +35,56 @@
                    {{event.timeString}}
                   </td>
                 </tr>
+
+                <!-- AM PM Format -->
+                <tr v-else>
+                  <th>When:</th>
+                  <td v-if="access == '2' && success != 'success' || user.id == event.id_user && success != 'success'">
+                    <select v-model="selTimeH_Start">
+                      <option v-for="tAmPmS in timeAMPM_Start" :value="tAmPmS.val">{{tAmPmS.title}}</option>
+                    </select>
+                    <select v-model="selTimeM_Start">
+                      <option value="0">00</option>
+                      <option value="30">30</option>
+                    </select>
+                    <select v-model="selAmPmStart">
+                      <option value="am">AM</option>
+                      <option value="pm">PM</option>
+                    </select>
+                     - 
+                    <select v-model="selTimeH_End">
+                      <option v-for="tAmPmE in timeAMPM_End" :value="tAmPmE.val">{{tAmPmE.title}}</option>
+                    </select>
+                    <select v-model="selTimeM_End">
+                      <option value="0">00</option>
+                      <option value="30">30</option>
+                    </select>
+                    <select v-model="selAmPmEnd">
+                        <option value="am">AM</option>
+                        <option value="pm">PM</option>
+                    </select>
+                  </td>
+                  <td v-else>
+                   {{event.timeString}}
+                  </td>
+                </tr>
                 <tr>
                   <th>Notes:</th>
-                  <td v-if="access == '2' || user.id == event.id_user">
+                  <td v-if="access == '2' && success != 'success' || user.id == event.id_user && success != 'success'">
                     <input type="text" v-model="selDescription" :value="event.description">
                   </td>
                   <td v-else>{{event.description}}</td>
                 </tr>
                 <tr>
                   <th>Who:</th>
-                  <td v-if="event.user_name && access == '2'">
+                  <td v-if="event.user_name && access == '2' && success != 'success'">
                     <select class="selUser" v-model="selUser">
                         <option v-for="user in users" :value="user.id">{{user.username}}</option>
                     </select>
                   </td>
-                  <td v-else-if="event.user_name && access == '1'">{{event.user_name}}</td>
+                  <td v-else-if="event.user_name && access == '1' && success != 'success'">{{event.user_name}}</td>
                   <td v-else-if="!event.user_name" class="alert-danger">The user has been removed</td>
+                  <td v-else>{{event.user_name}}</td>
                 </tr>
                 <tr>
                   <td colspan="2">Submitted: {{event.create_time}}</td>
@@ -78,7 +113,7 @@
 import axios from 'axios'
 export default {
   name: 'HelloWorld',
-  props: ['sentEvent', 'sentUser'],
+  props: ['sentEvent', 'sentUser', 'timeFormat'],
   data () {
     return {
       msg: '',
@@ -101,6 +136,8 @@ export default {
       selTimeM_Start: '',
       selTimeH_End: '',
       selTimeM_End: '',
+      selAmPmStart: '',
+      selAmPmEnd: ''
     }
   },
   methods: {
@@ -112,6 +149,7 @@ export default {
       var timeSM = self.selTimeM_Start
       var timeEH = self.selTimeH_End
       var timeEM = self.selTimeM_End
+//Validate Data
       if (timeSH == timeEH && timeSM == timeEM){
         self.errorMsg = 'Specify the correct End date for the event!'
         return false
@@ -122,7 +160,7 @@ export default {
       }
       if (timeEH == timeEnd && timeEM == min30)
       {
-        self.errorMsg = 'Error! Maximum end time' + timeEnd + ':' + min00 + '!'
+        self.errorMsg = 'Error! Maximum end time ' + timeEnd + ':' + min00 + '!'
         return false
       }
       var date_start = new Date(self.event.time_start)
@@ -139,16 +177,12 @@ export default {
         return false
       }
 //params
-
       var data = {}
       data.hash = self.user.hash
       data.id_user = self.user.id
-      //recurring update
+//recurring update
       if (self.checked){
-        // data.checked = self.events
-        // console.log(data)
-        // console.log(self.prepareDataRecurringEventsForUpdate(self.events))
-        // return false
+        data.timestamp = date_start.getTime()
         data.checked = self.prepareDataRecurringEventsForUpdate(self.events)
       }
       else
@@ -163,17 +197,26 @@ export default {
         data.dateTimeEnd = dateTimeEnd
         data.id_room = self.event.id_room
         data.description = self.selDescription
-        // console.log(data)
-        // return false
       }
 //request
       axios.put(getUrl() + 'events/', data, axConf)
         .then(function (response) {
-          console.log(response.data)
-          if (response.data == 1)
+          if (response.data == 1 || response.data == true)
           {
             self.msg = 'Event update Successfully!'
+            self.success = 'success'
             self.$emit('refresh')
+          }
+          else if (Array.isArray(response.data))
+          {
+            var i = 1
+              response.data.forEach(function(event){
+                self.errorMsg += i + ') ' + event +'. '
+                i++
+              })
+              self.msg = 'Your event(s) - Updated with error(s)!'
+              self.success = 'success'
+              self.$emit('refresh')
           }
           else
           {
@@ -186,11 +229,7 @@ export default {
     },
 
     prepareDataRecurringEventsForUpdate: function(events){
-      //Собрать такой же массив как и при единичной отправке только многомерный
-      //ДАТУ НУЖНО СДЕЛАТЬ!!!!!
       var self = this
-      // console.log(self.events)
-      // return false
       var arrDataEvents = []
       events.forEach(function(el){
         var newEvent = {}
@@ -210,13 +249,6 @@ export default {
         newEvent.dateTimeStart = dateTimeStart
         newEvent.dateTimeEnd = dateTimeEnd
         arrDataEvents.push(newEvent)
-        //НЕТ ДАТЫ!!!!! для каждого эвэнта своя дата!!!!
-        //ПриМер:
-            // var date_start = new Date(self.event.time_start)
-            // var date_end = new Date(self.event.time_end)
-            // self.eventYear = date_start.getFullYear()
-            // self.eventMonth = date_start.getMonth()
-            // self.eventDay = date_start.getDate()
       })
       return arrDataEvents
     },
@@ -226,6 +258,11 @@ export default {
       self.errorMsg = ''
       self.msg = ''
       self.success = ''
+      var result = confirm('Do you want to remove Event(s)?')
+      if (!result)
+      {
+        return false
+      }
       var requestUrl = ''
       if (self.checked){
         requestUrl = getUrl() + 'events/hash/' + self.user.hash + '/id_user/' + self.user.id +
@@ -239,7 +276,6 @@ export default {
       }
       axios.delete(requestUrl)
           .then(function (response) {
-          console.log(response.data)
           if (response.data == 1)
           {
             self.msg = 'User Event "'+ self.event.user_name +'", Delete Successfully!'
@@ -310,7 +346,6 @@ export default {
       var self = this
       self.errorMsg = ''
       self.events = []
-      // console.log(self.event)
       var requestUrl = ''
       if (self.event.id_parent)
       {
@@ -324,7 +359,6 @@ export default {
       }
       axios.get(requestUrl)
         .then(function (response) {
-          // console.log(response.data)
         if (Array.isArray(response.data))
         {
           self.events = response.data 
@@ -353,12 +387,76 @@ export default {
       self.selTimeM_Start = date_start.getMinutes()
       self.selTimeH_End = date_end.getHours()
       self.selTimeM_End = date_end.getMinutes()
+      if (self.timeFormat == 'am-pm')
+      {
+        if (self.selTimeH_Start >= timeNoon){
+          self.selAmPmStart = 'pm'
+        }
+        else
+        {
+          self.selAmPmStart = 'am'
+        }
+
+        if (self.selTimeH_End >= timeNoon){
+          self.selAmPmEnd = 'pm'
+        }
+        else
+        {
+          self.selAmPmEnd = 'am'
+        }
+      }
     }
   },
   created(){
     this.setProporties()
   },
   computed: {
+    timeAMPM_Start(){
+      var self = this
+      var timeH = []
+      if (self.timeFormat == 'am-pm')
+      {
+        if (self.selAmPmStart == 'am'){
+          for(var i=timeStart; i<timeNoon; i++){
+            timeH.push({val: i, title: i})
+          }
+          return timeH
+        }
+        else if (self.selAmPmStart == 'pm'){
+          for(var i=timeNoon; i<timeEnd; i++){
+            var objTime = {}
+            objTime.val = i
+            objTime.title = (i != timeNoon) ? i-timeNoon : timeNoon
+            timeH.push(objTime)
+          }
+          return timeH
+        }
+      }
+    },
+
+    timeAMPM_End(){
+      var self = this
+      var timeH = []
+      if (self.timeFormat == 'am-pm')
+      {
+        if (self.selAmPmEnd == 'am'){
+          for(var i=timeStart; i<timeNoon; i++){
+            timeH.push({val: i, title: i})
+          }
+          return timeH
+        }
+        else if (self.selAmPmEnd == 'pm'){
+          for(var i=timeNoon; i<timeEnd+1; i++){
+            var objTime = {}
+            objTime.val = i
+            objTime.title = (i != timeNoon) ? i-timeNoon : timeNoon
+            timeH.push(objTime)
+          }
+          return timeH
+        }
+      }
+    },
+
     timeH_S(){
       var self = this
       var timeH = []
@@ -367,6 +465,7 @@ export default {
       }
       return timeH
     },
+
     timeH_E(){
       var self = this
       var timeH = []
@@ -437,5 +536,8 @@ th{
 .checkA{
   text-align: center;
   margin-bottom: 10px;
+}
+.plusWidth{
+  width: 420px;
 }
 </style>
