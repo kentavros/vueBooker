@@ -1,7 +1,7 @@
 <template>
   <div class="editUser">
   <div class="regForm">
-      <p class="alert-danger">{{errorMsg}}</p>
+      <p v-if="errorMsg != ''" class="alert alert-danger">{{errorMsg}}</p>
         <fieldset>
             <div id="legend">
             <legend class="title">Edit User Information</legend>
@@ -191,7 +191,7 @@ export default {
 }
 .regForm{
   position: relative;
-  top: 100px;
+  top: 30px;
   margin: auto;
   color: darkblue;
   width: 550px;

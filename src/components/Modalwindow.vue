@@ -500,7 +500,7 @@ export default {
   vertical-align: middle;
 }
 .modal-container {
-  width: 330px;
+  width: 333px;
   margin: 0px auto;
   padding: 20px 30px;
   background-color: #fff;
@@ -539,6 +539,6 @@ th{
   margin-bottom: 10px;
 }
 .plusWidth{
-  width: 420px;
+  width: 435px;
 }
 </style>
