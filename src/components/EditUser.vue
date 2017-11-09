@@ -161,6 +161,10 @@ export default {
           else
           {
               self.errorMsg = response.data
+              if (self.errorMsg === false)
+              {
+                self.errorMsg = 'This email "' + self.selUser.email + '" already exists!'
+              }
           }
         })
           .catch(function (error) {

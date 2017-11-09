@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <div class="loginForm">
+    <div class="loginForm text-center center-block">
       <p class="alert-danger">{{errorMsg}}</p>
       <fieldset>
         <div id="legend">
