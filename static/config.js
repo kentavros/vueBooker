@@ -5,16 +5,16 @@ var axConf = {
             'Content-Type': 'application/x-www-form-urlencoded'
     }
 }
+//Get connection http for axios request
+function getUrl() {
+    return classU
+}
 //Time H:m - start & end to create event
 var timeStart = 8
 var timeEnd = 20
 var timeNoon = 12
 var min00 = '00'
 var min30 = '30'
-//Get connection http for axios request
-function getUrl() {
-    return homeU
-}
 //Get the order of days of the week
 function getWeekDays(str){
     if (str == 'sun')
